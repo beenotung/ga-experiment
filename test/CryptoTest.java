@@ -13,10 +13,13 @@ public class CryptoTest {
   boolean validTest(Crypto.ICrypto crypto, Crypto.Config config, String message) {
     crypto.prepare(config);
 
-    ByteArray plaintext = crypto.preprocess(message);
+    int length = message.length();
 
-    ByteArray cipher = new ByteArray();
-    ByteArray result = new ByteArray();
+    ByteArray plaintext = new ByteArray(length);
+    crypto.preprocess(message, plaintext);
+
+    ByteArray cipher = new ByteArray(length);
+    ByteArray result = new ByteArray(length);
 
     crypto.encryp(plaintext, cipher);
     crypto.decryp(cipher, result);
@@ -32,9 +35,12 @@ public class CryptoTest {
     cryptos.add(new Shift());
 
     for (Crypto.ICrypto crypto : cryptos) {
-      $MODULE.validTest(crypto, crypto.sampleConfig(), msg);
-      crypto.prepare(crypto.sampleConfig());
-      $MODULE.validTest(crypto.);
+      boolean res = $MODULE.validTest(crypto, crypto.sampleConfig(), msg);
+      if (res) {
+        println("Passed", crypto.getClass().getSimpleName());
+      } else {
+        println("Failed", crypto.getClass().getSimpleName());
+      }
     }
 
     println("end test");

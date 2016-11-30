@@ -32,12 +32,12 @@ public class Crypto {
 
     <A extends Config> void prepare(A config);
 
-    ByteArray preprocess(String plaintext);
+    void preprocess(String plaintext, final ByteArray res);
 
     String postprocess(ByteArray cipher);
 
-    void encryp(ByteArray plaintext, ByteArray cipher);
+    void encryp(ByteArray plaintext, final ByteArray cipher);
 
-    void decryp(ByteArray cipher, ByteArray plaintext);
+    void decryp(ByteArray cipher, final ByteArray plaintext);
   }
 }

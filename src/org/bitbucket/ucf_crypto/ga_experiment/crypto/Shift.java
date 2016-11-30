@@ -1,6 +1,7 @@
 package org.bitbucket.ucf_crypto.ga_experiment.crypto;
 
 import com.github.beenotung.javalib.Utils;
+import com.github.beenotung.javalib.Utils.ByteArray;
 
 public class Shift implements Crypto.ICrypto {
   public static class Config extends Crypto.Config {
@@ -22,9 +23,10 @@ public class Shift implements Crypto.ICrypto {
   }
 
   @Override
-  public Utils.ByteArray preprocess(String plaintext) {
-    Utils.ByteArray res = new Utils.ByteArray();
-    res.data = new byte[plaintext.length()];
+  public void preprocess(String plaintext, final ByteArray res) {
+    if (res.data.length < plaintext.length())
+      res.data = new byte[plaintext.length()];
+    res.len = 0;
     for (byte b : plaintext.getBytes()) {
       if ('a' <= b && b <= 'z') {
         res.data[res.len++] = (byte) (b - 'a');
@@ -32,11 +34,10 @@ public class Shift implements Crypto.ICrypto {
         res.data[res.len++] = (byte) (b - 'A');
       }
     }
-    return res;
   }
 
   @Override
-  public String postprocess(Utils.ByteArray cipher) {
+  public String postprocess(ByteArray cipher) {
     char[] cs = new char[cipher.len];
     for (int i = 0; i < cipher.len; i++) {
       cs[i] = (char) (cipher.data[i + cipher.offset] + 'a');
@@ -45,7 +46,7 @@ public class Shift implements Crypto.ICrypto {
   }
 
   @Override
-  public void encryp(Utils.ByteArray plaintext, Utils.ByteArray cipher) {
+  public void encryp(ByteArray plaintext, final ByteArray cipher) {
     if (cipher.data.length < plaintext.len) {
       cipher.data = new byte[plaintext.len];
     }
@@ -62,7 +63,7 @@ public class Shift implements Crypto.ICrypto {
   }
 
   @Override
-  public void decryp(Utils.ByteArray cipher, Utils.ByteArray plaintext) {
+  public void decryp(ByteArray cipher, final ByteArray plaintext) {
     if (plaintext.data.length < cipher.len) {
       plaintext.data = new byte[cipher.len];
       plaintext.len = cipher.len;
