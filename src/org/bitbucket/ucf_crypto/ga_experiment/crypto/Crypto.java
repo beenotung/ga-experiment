@@ -1,14 +1,43 @@
 package org.bitbucket.ucf_crypto.ga_experiment.crypto;
 
+import com.github.beenotung.javalib.Utils;
+import com.github.beenotung.javalib.Utils.ByteArray;
+import com.github.beenotung.javalib.Utils.CharArray;
+
+import java.util.ArrayList;
+
 public class Crypto {
-  public static class IKey {
+  public static Crypto $MODULE = new Crypto();
+
+  /* including the key */
+  public static class Config {
+    /**
+     * base 26 for English letter (only lower case)
+     * base 36 for English letter (only lower case) and digit
+     * base 256 for raw data [0..255]
+     * */
+    byte base;
+
+    /**
+     * @final
+     * apply default settings
+     * */
+    public Config() {
+      base = 26;
+    }
   }
 
   public interface ICrypto {
-    <A extends IKey> void prepare(A key);
+    <A extends Config> A sampleConfig();
 
-    char[] encryp(char[] plaintext);
+    <A extends Config> void prepare(A config);
 
-    char[] decryp(char[] cipher);
+    ByteArray preprocess(String plaintext);
+
+    String postprocess(ByteArray cipher);
+
+    void encryp(ByteArray plaintext, ByteArray cipher);
+
+    void decryp(ByteArray cipher, ByteArray plaintext);
   }
 }
