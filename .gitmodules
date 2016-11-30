@@ -1,0 +1,3 @@
+[submodule "submodule/javalib"]
+	path = lib/javalib
+	url = https://github.com/beenotung/javalib.git
