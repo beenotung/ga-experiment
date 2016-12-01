@@ -1,36 +1,42 @@
 package org.bitbucket.ucf_crypto.ga_experiment.crypto;
 
-import com.github.beenotung.javalib.Utils;
 import com.github.beenotung.javalib.Utils.ByteArray;
-import com.github.beenotung.javalib.Utils.CharArray;
 
 import java.util.ArrayList;
 
 public class Crypto {
   public static Crypto $MODULE = new Crypto();
+  public ArrayList<ICrypto> impls = new ArrayList<>();
 
-  /* including the key */
-  public static class Config {
+  /**
+   * must be override to store the key internal
+   * must override the equals method to check if the key match
+   *
+   * */
+  public abstract static class IConfig {
     /**
      * base 26 for English letter (only lower case)
      * base 36 for English letter (only lower case) and digit
      * base 256 for raw data [0..255]
      * */
-    byte base;
+    public byte base;
 
     /**
      * @final
      * apply default settings
      * */
-    public Config() {
+    public IConfig() {
       base = 26;
     }
   }
 
   public interface ICrypto {
-    <A extends Config> A sampleConfig();
+    /**
+     * it should return a random config that is different every time
+     * */
+    <A extends IConfig> A sampleConfig();
 
-    <A extends Config> void prepare(A config);
+    <A extends IConfig> void prepare(A config);
 
     void preprocess(String plaintext, final ByteArray res);
 

@@ -3,22 +3,49 @@ package org.bitbucket.ucf_crypto.ga_experiment.crypto;
 import com.github.beenotung.javalib.Utils;
 import com.github.beenotung.javalib.Utils.ByteArray;
 
+import static com.github.beenotung.javalib.Utils.objectToString;
+import static com.github.beenotung.javalib.Utils.random;
+import static com.github.beenotung.javalib.Utils.randomByte;
+
 public class Shift implements Crypto.ICrypto {
-  public static class Config extends Crypto.Config {
-    byte offset;
+  public static Shift $MODULE = new Shift();
+
+  static {
+    Crypto.$MODULE.impls.add($MODULE);
   }
 
-  Config config;
+  public static class Config extends Crypto.IConfig {
+    public byte offset;
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj instanceof Config) {
+        Config o = (Config) obj;
+        return
+          this.base == o.base
+            && this.offset == o.offset
+          ;
+      }
+      return super.equals(obj);
+    }
+
+    @Override
+    public String toString() {
+      return "offset=" + offset;
+    }
+  }
+
+  private Config config;
 
   @Override
-  public <A extends Crypto.Config> A sampleConfig() {
+  public <A extends Crypto.IConfig> A sampleConfig() {
     Config c = new Config();
-    c.offset = 4;
+    c.offset = (byte) random.nextInt(c.base);
     return (A) c;
   }
 
   @Override
-  public <A extends Crypto.Config> void prepare(A config) {
+  public <A extends Crypto.IConfig> void prepare(A config) {
     this.config = (Config) config;
   }
 

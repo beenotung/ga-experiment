@@ -1,4 +1,3 @@
-import com.github.beenotung.javalib.Utils;
 import com.github.beenotung.javalib.Utils.ByteArray;
 import org.bitbucket.ucf_crypto.ga_experiment.crypto.Crypto;
 import org.bitbucket.ucf_crypto.ga_experiment.crypto.Shift;
@@ -10,7 +9,7 @@ import static com.github.beenotung.javalib.Utils.println;
 public class CryptoTest {
   public static CryptoTest $MODULE = new CryptoTest();
 
-  boolean validTest(Crypto.ICrypto crypto, Crypto.Config config, String message) {
+  boolean validTest(Crypto.ICrypto crypto, Crypto.IConfig config, String message) {
     crypto.prepare(config);
 
     int length = message.length();
@@ -28,11 +27,11 @@ public class CryptoTest {
   }
 
   public static void main(String[] args) {
-    println("begin test");
+    println("begin", $MODULE.getClass().getName());
     String msg = "This is a sample message";
 
     ArrayList<Crypto.ICrypto> cryptos = new ArrayList<>();
-    cryptos.add(new Shift());
+    cryptos.add(Shift.$MODULE);
 
     for (Crypto.ICrypto crypto : cryptos) {
       boolean res = $MODULE.validTest(crypto, crypto.sampleConfig(), msg);
@@ -43,6 +42,6 @@ public class CryptoTest {
       }
     }
 
-    println("end test");
+    println("end", $MODULE.getClass().getName());
   }
 }
