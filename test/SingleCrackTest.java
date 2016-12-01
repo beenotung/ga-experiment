@@ -1,14 +1,9 @@
 import com.github.beenotung.javalib.Utils;
-import com.github.beenotung.javalib.Utils7;
 import org.bitbucket.ucf_crypto.ga_experiment.crack.BruteForceCrack;
 import org.bitbucket.ucf_crypto.ga_experiment.crack.Crack;
 import org.bitbucket.ucf_crypto.ga_experiment.crypto.Crypto;
-import org.bitbucket.ucf_crypto.ga_experiment.crypto.*;
 
-import java.lang.management.BufferPoolMXBean;
-import java.time.Duration;
 import java.util.ArrayList;
-import java.util.function.Supplier;
 
 import static com.github.beenotung.javalib.Utils.*;
 
@@ -38,7 +33,7 @@ public class SingleCrackTest {
         if (n == 0) {
           println("msg len:", message.length(), '|', iCrypto.getClass().getSimpleName(), "failed on all case");
         } else {
-          println("msg len:", message.length(), '|', iCrypto.getClass().getSimpleName(), "failed on", TestConfig.N_Pair - n, "case", "| avg sucess time:", nano_to_string(acc / n)g);
+          println("msg len:", message.length(), '|', iCrypto.getClass().getSimpleName(), "passed", n, "case | failed", TestConfig.N_Pair - n, "case | avg sucess time:", nano_to_string(acc / n));
         }
       });
     }
@@ -62,14 +57,10 @@ public class SingleCrackTest {
     cracker.crack(crypto, solutionConfig, pairs);
     long end_time = System.nanoTime();
     print("\rdone\r");
-    return pair(keyConfig.equals(solutionConfig), end_time - start_time);
-//    boolean equals = keyConfig.equals(solutionConfig);
-//    if (equals) {
-//      println("Passed Crack, key:", keyConfig);
-//    } else {
-//      println("Failed Crack, real key:", keyConfig, "| guess key:", solutionConfig);
-//    }
-//    println("used", nano_to_string(end_time - start_time));
-//    return pair(equals, end_time - start_time);
+    boolean equals = keyConfig.equals(solutionConfig);
+    if (!equals) {
+      println(cracker.getClass().getSimpleName(), "failed cracking", crypto.getClass().getSimpleName(), "| real key:", keyConfig, "| guess key:", solutionConfig);
+    }
+    return pair(equals, end_time - start_time);
   }
 }
