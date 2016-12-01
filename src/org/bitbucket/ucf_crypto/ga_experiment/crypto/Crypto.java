@@ -5,7 +5,7 @@ import com.github.beenotung.javalib.Utils.ByteArray;
 import java.util.ArrayList;
 
 public class Crypto {
-  public static Crypto $MODULE = new Crypto();
+  public static final Crypto $MODULE = new Crypto();
   public ArrayList<ICrypto> impls = new ArrayList<>();
 
   /**

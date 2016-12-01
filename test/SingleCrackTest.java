@@ -1,6 +1,7 @@
 import com.github.beenotung.javalib.Utils;
 import org.bitbucket.ucf_crypto.ga_experiment.crack.BruteForceCrack;
 import org.bitbucket.ucf_crypto.ga_experiment.crack.Crack;
+import org.bitbucket.ucf_crypto.ga_experiment.crack.GACrack;
 import org.bitbucket.ucf_crypto.ga_experiment.crypto.Crypto;
 
 import java.util.ArrayList;
@@ -18,27 +19,47 @@ public class SingleCrackTest {
 
     org.bitbucket.ucf_crypto.ga_experiment.crypto.Package.loadAll();
 
-    for (String message : TestConfig.messages) {
+    $MODULE.crack(BruteForceCrack.$MODULE, TestConfig.messages, TestConfig.N_Pair);
+    $MODULE.crack(GACrack.$MODULE, TestConfig.messages, TestConfig.N_Pair);
+
+    println("end", $MODULE.getClass().getName());
+  }
+
+  void crack(Crack.ICrack cracker, String[] messages, int n_pair) {
+    for (int base : TestConfig.Bases) {
+      crack(cracker, messages, base, n_pair);
+    }
+  }
+
+  void crack(Crack.ICrack cracker, String[] messages, int base, int n_pair) {
+    for (String message : messages) {
       Crypto.$MODULE.impls.forEach(iCrypto -> {
         long acc = 0;
+        long best = Long.MAX_VALUE;
+        long worst = Long.MIN_VALUE;
         long n = 0;
-        for (int i = 0; i < TestConfig.N_Pair; i++) {
+        for (int i = 0; i < n_pair; i++) {
           print("\rcracking message of length", message.length(), i, "/", TestConfig.N_Pair, "\r");
-          Pair<Boolean, Long> res = $MODULE.crack(BruteForceCrack.$MODULE, iCrypto, TestConfig.N_Pair, message);
+          Pair<Boolean, Long> res = $MODULE.crack(cracker, iCrypto, TestConfig.N_Pair, message);
           if (res._1) {
             acc += res._2;
             n++;
+            best = Math.min(best, res._2);
+            worst = Math.max(worst, res._2);
           }
         }
+        print(cracker.getClass().getSimpleName(), '|', iCrypto.getClass().getSimpleName(), "| msg len:", message.length(), '|', "base:", base, "| ");
         if (n == 0) {
-          println("msg len:", message.length(), '|', iCrypto.getClass().getSimpleName(), "failed on all case");
+          println("failed on all case");
         } else {
-          println("msg len:", message.length(), '|', iCrypto.getClass().getSimpleName(), "passed", n, "case | failed", TestConfig.N_Pair - n, "case | avg sucess time:", nano_to_string(acc / n));
+          print("passed", n, "case | failed", TestConfig.N_Pair - n, "case");
+          print("\t| avg time:", nano_to_string(acc / n));
+          print("\t| best time:", nano_to_string(best));
+          print("\t| worst time:", nano_to_string(worst));
+          println();
         }
       });
     }
-
-    println("end", $MODULE.getClass().getName());
   }
 
   Pair<Boolean, Long> crack(final Crack.ICrack cracker, Crypto.ICrypto crypto, final int n_pair, final String message) {

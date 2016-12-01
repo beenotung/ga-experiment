@@ -3,6 +3,7 @@
  */
 public class TestConfig {
   public static final int N_Pair = 10;
+  public static final int Bases[] = {26, 36, 256};
   public static final String[] messages = {
     "This is a short message."
     , "This is a longer message."

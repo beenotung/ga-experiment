@@ -16,10 +16,15 @@ import static com.github.beenotung.javalib.Utils.println;
  */
 public class BruteForceCrack implements Crack.ICrack {
   public static BruteForceCrack $MODULE = new BruteForceCrack();
-  HashMap<String, Crack.ICrack> impls = new HashMap<>();
+
+  static {
+    Crack.$MODULE.impls.add($MODULE);
+  }
+
+  HashMap<Class, Crack.ICrack> impls = new HashMap<>();
 
   private BruteForceCrack() {
-    impls.put(Shift.class.getName(), new Crack.ICrack() {
+    impls.put(Shift.class, new Crack.ICrack() {
       @Override
       public void crack(final Crypto.ICrypto crypto, final Crypto.IConfig config, ArrayList<Utils.Pair<ByteArray, ByteArray>> plaintext_cipher_pairs) {
         final Shift shift = (Shift) crypto;
@@ -42,7 +47,7 @@ public class BruteForceCrack implements Crack.ICrack {
 
   @Override
   public void crack(final Crypto.ICrypto crypto, final Crypto.IConfig config, final ArrayList<Utils.Pair<ByteArray, ByteArray>> plaintext_cipher_pairs) {
-    Crack.ICrack cracker = impls.get(crypto.getClass().getName());
+    Crack.ICrack cracker = impls.get(crypto.getClass());
     if (cracker != null) {
       cracker.crack(crypto, config, plaintext_cipher_pairs);
     } else {

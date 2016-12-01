@@ -9,6 +9,9 @@ import java.util.ArrayList;
  * Created by beenotung on 11/30/16.
  */
 public class Crack {
+  public static final Crack $MODULE = new Crack();
+  public ArrayList<ICrack> impls = new ArrayList<>();
+
   public interface ICrack {
     /**
      * crack a list of plaintext-cipher pairs with the same key
