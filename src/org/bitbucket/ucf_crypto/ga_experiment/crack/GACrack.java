@@ -11,6 +11,9 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static com.github.beenotung.javalib.Utils.mod;
+import static com.github.beenotung.javalib.Utils.to_int;
+
 /**
  * Created by beenotung on 11/30/16.
  */
@@ -79,10 +82,8 @@ public class GACrack implements Crack.ICrack {
         GA.GAUtils.simpleRestartUntilTargetFitness(ga, 0f, 0.2f, 1f);
         ga.useRuntime(gaRuntime -> {
           config.offset = gaRuntime.getGeneByRank(0)[0];
-          while (config.offset < config.base) {
-            config.offset += config.base;
-          }
-          config.offset %= config.base;
+          if (config.base != 0)
+            config.offset = (byte) mod(config.offset, config.base);
         });
       }
     });
@@ -117,8 +118,8 @@ public class GACrack implements Crack.ICrack {
               @Override
               public void randomGene(byte[] gene, int offset, int length) {
                 Affine.Config c = Affine.$MODULE.sampleConfig(config.base);
-                gene[0] = c.a;
-                gene[1] = c.b;
+                gene[0] = (byte) c.a;
+                gene[1] = (byte) c.b;
               }
             };
           }

@@ -45,7 +45,7 @@ public class CryptoUtils {
     }
   }
 
-  public static void string_to_bytes(String s, byte base, final Utils.ByteArray res) {
+  public static void string_to_bytes(String s, int base, final Utils.ByteArray res) {
     res.offset = 0;
     if (base == 0) {
       res.data = s.getBytes();
@@ -69,7 +69,7 @@ public class CryptoUtils {
     }
   }
 
-  public static String bytes_to_string(Utils.ByteArray bs, byte base) {
+  public static String bytes_to_string(Utils.ByteArray bs, int base) {
     if (base == 0) {
       return new String(bs.data, bs.offset, bs.len);
     }

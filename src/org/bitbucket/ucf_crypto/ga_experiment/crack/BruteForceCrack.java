@@ -10,8 +10,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static com.github.beenotung.javalib.Utils.gcd;
-import static com.github.beenotung.javalib.Utils.println;
+import static com.github.beenotung.javalib.Utils.*;
 
 /**
  * Created by beenotung on 11/30/16.
@@ -35,7 +34,7 @@ public class BruteForceCrack implements Crack.ICrack {
         for (Utils.Pair<ByteArray, ByteArray> plaintext_cipher_pair : plaintext_cipher_pairs) {
           if (c.base == 0) {
             for (int i = 0; i < 256; i++) {
-              c.offset = (byte) i;
+              c.offset =  i;
               shift.prepare(c);
               shift.decryp(plaintext_cipher_pair._2, result);
 //            println("plaintext:",plaintext_cipher_pair._1.toString(),"result:",result.toString());
@@ -61,13 +60,17 @@ public class BruteForceCrack implements Crack.ICrack {
       final Affine affine = (Affine) crypto;
       final Affine.Config c = (Affine.Config) config;
       ByteArray result = new ByteArray(0);
-      for (Utils.Pair<ByteArray, ByteArray> plaintext_cipher_pair : plaintext_cipher_pairs) {
-        for (c.a = 0; c.a < c.base; c.a++) {
-          if (gcd(c.a, c.base) != 1) {
-            continue;
-          }
-          for (c.b = 0; c.b < c.base; c.b++) {
-            affine.prepare(c);
+      final int A = config.base == 0 ? 256 : (config.base);
+      final int B = config.base == 0 ? 256 : (config.base);
+      for (int a = 0; a < A; a++) {
+        if (gcd(a, A) != 1) {
+          continue;
+        }
+        c.a = a;
+        for (int b = 0; b < B; b++) {
+          c.b = b;
+          affine.prepare(c);
+          for (Pair<ByteArray, ByteArray> plaintext_cipher_pair : plaintext_cipher_pairs) {
             affine.decryp(plaintext_cipher_pair._2, result);
             if (plaintext_cipher_pair._1.equals(result)) {
               return;

@@ -12,7 +12,7 @@ public class Shift implements Crypto.ICrypto {
   }
 
   public static class Config extends Crypto.IConfig {
-    public byte offset;
+    public int offset;
 
     @Override
     public boolean equals(Object obj) {
@@ -45,13 +45,13 @@ public class Shift implements Crypto.ICrypto {
   private Config config;
 
   @Override
-  public <A extends Crypto.IConfig> A sampleConfig(byte base) {
+  public <A extends Crypto.IConfig> A sampleConfig(int base) {
     Config res = new Config();
     res.base = base;
     if (base == 0)
-      res.offset = randomByte();
+      res.offset = random.nextInt(256);
     else
-      res.offset = (byte) random.nextInt(res.base);
+      res.offset = random.nextInt(res.base);
     return (A) res;
   }
 
@@ -77,15 +77,19 @@ public class Shift implements Crypto.ICrypto {
     }
     cipher.len = plaintext.len;
     cipher.offset = 0;
-    for (int i = 0; i < plaintext.len; i++) {
-      cipher.data[i] =
-        (byte) (
-          (plaintext.data[i + plaintext.offset]
+    if (config.base == 0) {
+      for (int i = 0; i < plaintext.len; i++) {
+        cipher.data[i] =
+          (byte) (plaintext.data[i + plaintext.offset]
+            + config.offset);
+      }
+    } else {
+      for (int i = 0; i < plaintext.len; i++) {
+        cipher.data[i] =
+          (byte) ((plaintext.data[i + plaintext.offset]
             + config.offset)
-        );
-    }
-    if (config.base != 0) {
-      update(cipher.data, 0, cipher.len, x -> (byte) mod(x, config.base));
+            % config.base);
+      }
     }
   }
 
@@ -100,10 +104,9 @@ public class Shift implements Crypto.ICrypto {
     if (config.base == 0) {
       for (int i = 0; i < cipher.len; i++) {
         plaintext.data[i] =
-          (byte) ((cipher.data[i + cipher.offset]
+          (byte) (cipher.data[i + cipher.offset]
             - config.offset
-            + config.base)
-          );
+            + config.base);
       }
     } else {
       for (int i = 0; i < cipher.len; i++) {
@@ -111,8 +114,7 @@ public class Shift implements Crypto.ICrypto {
           (byte) ((cipher.data[i + cipher.offset]
             - config.offset
             + config.base)
-            % config.base
-          );
+            % config.base);
       }
     }
   }

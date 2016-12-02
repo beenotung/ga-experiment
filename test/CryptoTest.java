@@ -1,4 +1,5 @@
 import com.github.beenotung.javalib.Utils.ByteArray;
+import org.bitbucket.ucf_crypto.ga_experiment.crypto.Affine;
 import org.bitbucket.ucf_crypto.ga_experiment.crypto.Crypto;
 import org.bitbucket.ucf_crypto.ga_experiment.crypto.Package;
 import org.bitbucket.ucf_crypto.ga_experiment.crypto.Shift;
@@ -42,12 +43,20 @@ public class CryptoTest {
 
     Package.loadAll();
     for (Crypto.ICrypto crypto : Crypto.$MODULE.impls) {
-      boolean res = $MODULE.validTest(crypto, crypto.sampleConfig((byte) 26), msg);
+      boolean res = $MODULE.validTest(crypto, crypto.sampleConfig(26), msg);
       if (res) {
         println("Passed", crypto.getClass().getSimpleName());
       } else {
         println("Failed", crypto.getClass().getSimpleName());
       }
+    }
+
+    {
+
+      Affine.Config conf = Affine.$MODULE.sampleConfig(0);
+      conf.a = 22;
+      conf.b = 77;
+      $MODULE.validTest(Affine.$MODULE, conf, TestConfig.messages[0]);
     }
 
     println("end", $MODULE.getClass().getName());

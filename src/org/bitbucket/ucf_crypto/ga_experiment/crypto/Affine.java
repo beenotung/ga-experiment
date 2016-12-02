@@ -12,12 +12,12 @@ public class Affine implements Crypto.ICrypto {
   }
 
   private Config config;
-  private byte[] table;
-  private byte[] re_table;
+  private int[] table;
+  private int[] re_table;
 
   public static class Config extends Crypto.IConfig {
-    public byte a;
-    public byte b;
+    public int a;
+    public int b;
 
     @Override
     public String toString() {
@@ -55,20 +55,20 @@ public class Affine implements Crypto.ICrypto {
   }
 
   @Override
-  public <A extends Crypto.IConfig> A sampleConfig(byte base) {
+  public <A extends Crypto.IConfig> A sampleConfig(int base) {
     Config res = new Config();
     res.base = base;
     if (base == 0) {
-      res.a = randomByte();
-      res.b = randomByte();
+      res.a = random.nextInt(256);
+      res.b = random.nextInt(256);
     } else {
       for (; ; ) {
-        res.a = (byte) random.nextInt(res.base);
+        res.a = random.nextInt(res.base);
         if (gcd(res.a, res.base) == 1) {
           break;
         }
       }
-      res.b = (byte) random.nextInt(res.base);
+      res.b = random.nextInt(res.base);
     }
     return (A) res;
   }
@@ -76,21 +76,22 @@ public class Affine implements Crypto.ICrypto {
   @Override
   public <A extends Crypto.IConfig> void prepare(A config) {
     this.config = (Config) config;
-    table = new byte[256];
-    re_table = new byte[256];
+    table = new int[256];
+    re_table = new int[256];
+    final int base = this.config.base == 0 ? 256 : this.config.base;
     if (((Config) config).base == 0) {
       for (int i = 0; i < 256; i++) {
-        table[i] = (byte) (i * this.config.a + this.config.b);
+        table[i] = mod(i * this.config.a + this.config.b, base);
       }
       for (int i = 0; i < 256; i++) {
-        re_table[to_int(table[i])] = (byte) i;
+        re_table[table[i]] = i;
       }
     } else {
       for (int i = 0; i < 256; i++) {
-        table[i] = (byte) mod(i * this.config.a + this.config.b, config.base);
+        table[i] = mod(i * this.config.a + this.config.b, config.base);
       }
       for (int i = 0; i < 256; i++) {
-        re_table[to_int(table[i])] = (byte) mod(i, config.base);
+        re_table[table[i]] = mod(i, config.base);
       }
     }
   }
@@ -113,7 +114,7 @@ public class Affine implements Crypto.ICrypto {
     cipher.offset = 0;
     cipher.len = plaintext.len;
     for (int i = 0; i < plaintext.len; i++) {
-      cipher.data[i] = table[plaintext.data[i + plaintext.offset]];
+      cipher.data[i] = (byte) table[plaintext.data[i + plaintext.offset]];
     }
   }
 
@@ -125,7 +126,7 @@ public class Affine implements Crypto.ICrypto {
     plaintext.offset = 0;
     plaintext.len = cipher.len;
     for (int i = 0; i < cipher.len; i++) {
-      plaintext.data[i] = re_table[to_int(cipher.data[i + cipher.offset])];
+      plaintext.data[i] = (byte) re_table[to_int(cipher.data[i + cipher.offset])];
     }
   }
 }

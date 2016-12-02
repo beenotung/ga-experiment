@@ -19,7 +19,7 @@ public class Crypto {
      * base 36 for English letter (only lower case) and digit
      * base 256 for raw data [0..255]
      * */
-    public byte base;
+    public int base;
 
     /**
      * @final
@@ -37,7 +37,7 @@ public class Crypto {
     /**
      * it save save a valid key into the param
      * */
-    <A extends IConfig> A sampleConfig(byte base);
+    <A extends IConfig> A sampleConfig(int base);
 
     <A extends IConfig> void prepare(final A config);
 
