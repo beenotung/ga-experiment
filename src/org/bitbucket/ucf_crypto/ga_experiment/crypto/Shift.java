@@ -97,13 +97,23 @@ public class Shift implements Crypto.ICrypto {
     }
     plaintext.len = cipher.len;
 
-    for (int i = 0; i < cipher.len; i++) {
-      plaintext.data[i] =
-        (byte) ((cipher.data[i + cipher.offset]
-          - config.offset
-          + config.base)
-          % config.base
-        );
+    if (config.base == 0) {
+      for (int i = 0; i < cipher.len; i++) {
+        plaintext.data[i] =
+          (byte) ((cipher.data[i + cipher.offset]
+            - config.offset
+            + config.base)
+          );
+      }
+    } else {
+      for (int i = 0; i < cipher.len; i++) {
+        plaintext.data[i] =
+          (byte) ((cipher.data[i + cipher.offset]
+            - config.offset
+            + config.base)
+            % config.base
+          );
+      }
     }
   }
 }

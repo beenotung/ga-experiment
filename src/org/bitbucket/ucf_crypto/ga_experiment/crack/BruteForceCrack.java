@@ -33,13 +33,25 @@ public class BruteForceCrack implements Crack.ICrack {
         final Shift.Config c = (Shift.Config) config;
         ByteArray result = new ByteArray(0);
         for (Utils.Pair<ByteArray, ByteArray> plaintext_cipher_pair : plaintext_cipher_pairs) {
-          for (byte i = 0; i < c.base; i++) {
-            c.offset = i;
-            shift.prepare(c);
-            shift.decryp(plaintext_cipher_pair._2, result);
+          if (c.base == 0) {
+            for (int i = 0; i < 256; i++) {
+              c.offset = (byte) i;
+              shift.prepare(c);
+              shift.decryp(plaintext_cipher_pair._2, result);
 //            println("plaintext:",plaintext_cipher_pair._1.toString(),"result:",result.toString());
-            if (result.equals(plaintext_cipher_pair._1)) {
-              return;
+              if (result.equals(plaintext_cipher_pair._1)) {
+                return;
+              }
+            }
+          } else {
+            for (byte i = 0; i < c.base; i++) {
+              c.offset = i;
+              shift.prepare(c);
+              shift.decryp(plaintext_cipher_pair._2, result);
+//            println("plaintext:",plaintext_cipher_pair._1.toString(),"result:",result.toString());
+              if (result.equals(plaintext_cipher_pair._1)) {
+                return;
+              }
             }
           }
         }
