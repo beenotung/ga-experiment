@@ -2,6 +2,7 @@ package org.bitbucket.ucf_crypto.ga_experiment.crack;
 
 import com.github.beenotung.javalib.Utils;
 import com.github.beenotung.javalib.Utils.ByteArray;
+import org.bitbucket.ucf_crypto.ga_experiment.crypto.Affine;
 import org.bitbucket.ucf_crypto.ga_experiment.crypto.Crypto;
 import org.bitbucket.ucf_crypto.ga_experiment.crypto.Shift;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -9,6 +10,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static com.github.beenotung.javalib.Utils.gcd;
 import static com.github.beenotung.javalib.Utils.println;
 
 /**
@@ -37,6 +39,25 @@ public class BruteForceCrack implements Crack.ICrack {
             shift.decryp(plaintext_cipher_pair._2, result);
 //            println("plaintext:",plaintext_cipher_pair._1.toString(),"result:",result.toString());
             if (result.equals(plaintext_cipher_pair._1)) {
+              return;
+            }
+          }
+        }
+      }
+    });
+    impls.put(Affine.class, (crypto, config, plaintext_cipher_pairs) -> {
+      final Affine affine = (Affine) crypto;
+      final Affine.Config c = (Affine.Config) config;
+      ByteArray result = new ByteArray(0);
+      for (Utils.Pair<ByteArray, ByteArray> plaintext_cipher_pair : plaintext_cipher_pairs) {
+        for (c.a = 0; c.a < c.base; c.a++) {
+          if (gcd(c.a, c.base) != 1) {
+            continue;
+          }
+          for (c.b = 0; c.b < c.base; c.b++) {
+            affine.prepare(c);
+            affine.decryp(plaintext_cipher_pair._2, result);
+            if (plaintext_cipher_pair._1.equals(result)) {
               return;
             }
           }

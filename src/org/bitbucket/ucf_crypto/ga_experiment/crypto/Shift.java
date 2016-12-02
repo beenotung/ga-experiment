@@ -2,7 +2,7 @@ package org.bitbucket.ucf_crypto.ga_experiment.crypto;
 
 import com.github.beenotung.javalib.Utils.ByteArray;
 
-import static com.github.beenotung.javalib.Utils.random;
+import static com.github.beenotung.javalib.Utils.*;
 
 public class Shift implements Crypto.ICrypto {
   public static Shift $MODULE = new Shift();
@@ -45,10 +45,14 @@ public class Shift implements Crypto.ICrypto {
   private Config config;
 
   @Override
-  public <A extends Crypto.IConfig> A sampleConfig() {
-    Config c = new Config();
-    c.offset = (byte) random.nextInt(c.base);
-    return (A) c;
+  public <A extends Crypto.IConfig> A sampleConfig(byte base) {
+    Config res = new Config();
+    res.base = base;
+    if (base == 0)
+      res.offset = randomByte();
+    else
+      res.offset = (byte) random.nextInt(res.base);
+    return (A) res;
   }
 
   @Override
@@ -72,14 +76,16 @@ public class Shift implements Crypto.ICrypto {
       cipher.data = new byte[plaintext.len];
     }
     cipher.len = plaintext.len;
-
+    cipher.offset = 0;
     for (int i = 0; i < plaintext.len; i++) {
       cipher.data[i] =
         (byte) (
           (plaintext.data[i + plaintext.offset]
             + config.offset)
-            % config.base
         );
+    }
+    if (config.base != 0) {
+      update(cipher.data, 0, cipher.len, x -> (byte) mod(x, config.base));
     }
   }
 

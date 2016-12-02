@@ -42,7 +42,7 @@ public class CryptoTest {
 
     Package.loadAll();
     for (Crypto.ICrypto crypto : Crypto.$MODULE.impls) {
-      boolean res = $MODULE.validTest(crypto, crypto.sampleConfig(), msg);
+      boolean res = $MODULE.validTest(crypto, crypto.sampleConfig((byte) 26), msg);
       if (res) {
         println("Passed", crypto.getClass().getSimpleName());
       } else {

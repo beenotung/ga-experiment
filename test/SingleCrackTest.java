@@ -26,12 +26,12 @@ public class SingleCrackTest {
   }
 
   void crack(Crack.ICrack cracker, String[] messages, int n_pair) {
-    for (int base : TestConfig.Bases) {
+    for (byte base : TestConfig.Bases) {
       crack(cracker, messages, base, n_pair);
     }
   }
 
-  void crack(Crack.ICrack cracker, String[] messages, int base, int n_pair) {
+  void crack(Crack.ICrack cracker, String[] messages, byte base, int n_pair) {
     for (String message : messages) {
       Crypto.$MODULE.impls.forEach(iCrypto -> {
         long acc = 0;
@@ -40,7 +40,7 @@ public class SingleCrackTest {
         long n = 0;
         for (int i = 0; i < n_pair; i++) {
           print("\rcracking message of length", message.length(), i, "/", TestConfig.N_Pair, "\r");
-          Pair<Boolean, Long> res = $MODULE.crack(cracker, iCrypto, TestConfig.N_Pair, message);
+          Pair<Boolean, Long> res = $MODULE.crack(cracker, iCrypto, TestConfig.N_Pair, message, base);
           if (res._1) {
             acc += res._2;
             n++;
@@ -62,11 +62,11 @@ public class SingleCrackTest {
     }
   }
 
-  Pair<Boolean, Long> crack(final Crack.ICrack cracker, Crypto.ICrypto crypto, final int n_pair, final String message) {
+  Pair<Boolean, Long> crack(final Crack.ICrack cracker, Crypto.ICrypto crypto, final int n_pair, final String message, byte base) {
     print("Cracking", cracker.getClass().getSimpleName(), "with", crypto.getClass().getSimpleName(), "for", n_pair, "pairs on message of length", message.length());
-    Crypto.IConfig keyConfig = crypto.sampleConfig();
+    Crypto.IConfig keyConfig = crypto.sampleConfig(base);
     crypto.prepare(keyConfig);
-    Crypto.IConfig solutionConfig = crypto.sampleConfig();
+    Crypto.IConfig solutionConfig = crypto.sampleConfig(base);
     ArrayList<Utils.Pair<Utils.ByteArray, Utils.ByteArray>> pairs = list(fill(n_pair, () -> {
       ByteArray plaintext = new ByteArray(0);
       ByteArray cipher = new ByteArray(0);
@@ -77,10 +77,15 @@ public class SingleCrackTest {
     long start_time = System.nanoTime();
     cracker.crack(crypto, solutionConfig, pairs);
     long end_time = System.nanoTime();
-    print("\rdone\r");
+    print("\rdone");
+    out.flush();
+    print('\r');
     boolean equals = keyConfig.equals(solutionConfig);
     if (!equals) {
-      println(cracker.getClass().getSimpleName(), "failed cracking", crypto.getClass().getSimpleName(), "| real key:", keyConfig, "| guess key:", solutionConfig);
+      println(cracker.getClass().getSimpleName(), "failed cracking", crypto.getClass().getSimpleName()
+        , "| real key:", keyConfig
+        , "| guess key:", solutionConfig
+      );
     }
     return pair(equals, end_time - start_time);
   }

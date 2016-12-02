@@ -24,7 +24,7 @@ public class Crack {
      * */
     void crack(
       final Crypto.ICrypto crypto
-      , final Crypto.IConfig config
+      , final Crypto.IConfig solutionConfig
       , final ArrayList<Utils.Pair<Utils.ByteArray, Utils.ByteArray>> plaintext_cipher_pairs
     );
   }

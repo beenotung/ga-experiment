@@ -31,15 +31,15 @@ public class Crypto {
   }
 
   /**
-   * it should override toString to reflect the key
+   * it should return config with different valid key every time
    * */
   public interface ICrypto {
     /**
-     * it should return a random config that is different every time
+     * it save save a valid key into the param
      * */
-    <A extends IConfig> A sampleConfig();
+    <A extends IConfig> A sampleConfig(byte base);
 
-    <A extends IConfig> void prepare(A config);
+    <A extends IConfig> void prepare(final A config);
 
     void preprocess(String plaintext, final ByteArray res);
 

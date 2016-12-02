@@ -2,9 +2,7 @@ package org.bitbucket.ucf_crypto.ga_experiment.crypto;
 
 import com.github.beenotung.javalib.Utils;
 
-import static com.github.beenotung.javalib.Utils.gcd;
-import static com.github.beenotung.javalib.Utils.random;
-import static com.github.beenotung.javalib.Utils.to_int;
+import static com.github.beenotung.javalib.Utils.*;
 
 public class Affine implements Crypto.ICrypto {
   public static Affine $MODULE = new Affine();
@@ -24,9 +22,28 @@ public class Affine implements Crypto.ICrypto {
     @Override
     public String toString() {
       return
-        "a=" + a +
+        "base=" + base +
+          ", a=" + a +
           ", b=" + b
         ;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+
+      Config config = (Config) o;
+
+      if (a != config.a) return false;
+      return b == config.b;
+    }
+
+    @Override
+    public int hashCode() {
+      int result = (int) a;
+      result = 31 * result + (int) b;
+      return result;
     }
   }
 
@@ -38,15 +55,21 @@ public class Affine implements Crypto.ICrypto {
   }
 
   @Override
-  public <A extends Crypto.IConfig> A sampleConfig() {
+  public <A extends Crypto.IConfig> A sampleConfig(byte base) {
     Config res = new Config();
-    for (; ; ) {
-      res.a = (byte) random.nextInt(res.base);
-      if (gcd(res.a, res.base) == 1) {
-        break;
+    res.base = base;
+    if (base == 0) {
+      res.a = randomByte();
+      res.b = randomByte();
+    } else {
+      for (; ; ) {
+        res.a = (byte) random.nextInt(res.base);
+        if (gcd(res.a, res.base) == 1) {
+          break;
+        }
       }
+      res.b = (byte) random.nextInt(res.base);
     }
-    res.b = (byte) random.nextInt(res.base);
     return (A) res;
   }
 
@@ -55,11 +78,20 @@ public class Affine implements Crypto.ICrypto {
     this.config = (Config) config;
     table = new byte[256];
     re_table = new byte[256];
-    for (int i = 0; i < 256; i++) {
-      table[i] = (byte) ((i * this.config.a + this.config.b) % config.base);
-    }
-    for (int i = 0; i < 256; i++) {
-      re_table[to_int(table[i])] = (byte) i;
+    if (((Config) config).base == 0) {
+      for (int i = 0; i < 256; i++) {
+        table[i] = (byte) (i * this.config.a + this.config.b);
+      }
+      for (int i = 0; i < 256; i++) {
+        re_table[to_int(table[i])] = (byte) i;
+      }
+    } else {
+      for (int i = 0; i < 256; i++) {
+        table[i] = (byte) mod(i * this.config.a + this.config.b, config.base);
+      }
+      for (int i = 0; i < 256; i++) {
+        re_table[to_int(table[i])] = (byte) mod(i, config.base);
+      }
     }
   }
 

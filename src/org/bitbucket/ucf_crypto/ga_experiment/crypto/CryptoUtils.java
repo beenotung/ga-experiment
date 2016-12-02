@@ -27,10 +27,12 @@ public class CryptoUtils {
     }
     for (byte i = 0; i < 26; i++) {
       char36_to_byte[i + 'a'] = i;
-      char36_to_byte[i + 'A'] = (byte) (i + 26);
+//      char36_to_byte[i + 'A'] = (byte) (i + 26);
+      char36_to_byte[i + 'A'] = i;
     }
     for (byte i = 0; i < 10; i++) {
-      char36_to_byte[i + '0'] = (byte) (i + 26 + 26);
+//      char36_to_byte[i + '0'] = (byte) (i + 26 + 26);
+      char36_to_byte[i + '0'] = (byte) (i + 26);
     }
 
     for (int i = 0; i < 256; i++) {
@@ -43,9 +45,9 @@ public class CryptoUtils {
     }
   }
 
-  public static void string_to_bytes(String s, int base, final Utils.ByteArray res) {
+  public static void string_to_bytes(String s, byte base, final Utils.ByteArray res) {
     res.offset = 0;
-    if (base == 256) {
+    if (base == 0) {
       res.data = s.getBytes();
       res.len = res.data.length;
       return;
@@ -67,8 +69,8 @@ public class CryptoUtils {
     }
   }
 
-  public static String bytes_to_string(Utils.ByteArray bs, int base) {
-    if (base == 256) {
+  public static String bytes_to_string(Utils.ByteArray bs, byte base) {
+    if (base == 0) {
       return new String(bs.data, bs.offset, bs.len);
     }
     StringBuilder b = new StringBuilder();
