@@ -6,5 +6,6 @@ package org.bitbucket.ucf_crypto.ga_experiment.crypto;
 public class Package {
   public static void loadAll() throws ClassNotFoundException {
     Class.forName(Shift.class.getName());
+    Class.forName(Affine.class.getName());
   }
 }

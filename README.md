@@ -6,12 +6,12 @@ Prove the pros and cons of using GA to crack crypto system.
 Find the turning point when GA is better traditional cryptanalysis.
 
 ## Involve crypto algorithms
- - Shift
- - Affine
- - Substitution
- - Playfair
- - ADFGVX
- - Transposition
+ - [x] Shift
+ - [x] Affine
+ - [ ] Substitution
+ - [ ] Playfair
+ - [ ] ADFGVX
+ - [ ] Transposition
 
 ## Test Scope
  - English plaintext (A-Z)
@@ -26,8 +26,8 @@ Find the turning point when GA is better traditional cryptanalysis.
 ## Todo
  1. [x] Implement GA bare-bone
  2. [ ] Single algorithm
-    1. [ ] Use GA to crack the key, measure time used
-    2. [ ] Use traditional cryptanalysis to crack the keyl, stop when excess 1.5 times time used by GA
+    1. [x] Use GA to crack the key, measure time used
+    2. [ ] Use traditional cryptanalysis to crack the key, stop when excess 1.5 times time used by GA
  3. [ ] Combination of two to three algorithms
     1. [ ] Use GA to crack the key, measure time used
     2. [ ] Use traditional cryptanalysis to crack the key, stop when excess 1.5 times time used by GA

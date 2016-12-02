@@ -1,5 +1,6 @@
 import com.github.beenotung.javalib.Utils.ByteArray;
 import org.bitbucket.ucf_crypto.ga_experiment.crypto.Crypto;
+import org.bitbucket.ucf_crypto.ga_experiment.crypto.Package;
 import org.bitbucket.ucf_crypto.ga_experiment.crypto.Shift;
 
 import java.util.ArrayList;
@@ -12,6 +13,8 @@ public class CryptoTest {
   boolean validTest(Crypto.ICrypto crypto, Crypto.IConfig config, String message) {
     crypto.prepare(config);
 
+    println('\t', crypto.toString());
+
     int length = message.length();
 
     ByteArray plaintext = new ByteArray(length);
@@ -23,17 +26,22 @@ public class CryptoTest {
     crypto.encryp(plaintext, cipher);
     crypto.decryp(cipher, result);
 
-    return plaintext.equals(result);
+    String cipher_text = crypto.postprocess(cipher);
+    String result_text = crypto.postprocess(result);
+    String plaintext_text = crypto.postprocess(plaintext);
+    println("\t[", message, "] --> [", cipher_text, ']');
+    println("\t[", cipher_text, "] <-- [", result_text, ']');
+
+//    return plaintext.equals(result);
+    return plaintext_text.equals(result_text);
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws ClassNotFoundException {
     println("begin", $MODULE.getClass().getName());
     String msg = "This is a sample message";
 
-    ArrayList<Crypto.ICrypto> cryptos = new ArrayList<>();
-    cryptos.add(Shift.$MODULE);
-
-    for (Crypto.ICrypto crypto : cryptos) {
+    Package.loadAll();
+    for (Crypto.ICrypto crypto : Crypto.$MODULE.impls) {
       boolean res = $MODULE.validTest(crypto, crypto.sampleConfig(), msg);
       if (res) {
         println("Passed", crypto.getClass().getSimpleName());

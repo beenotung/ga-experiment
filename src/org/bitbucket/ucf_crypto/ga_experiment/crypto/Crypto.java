@@ -30,6 +30,9 @@ public class Crypto {
     }
   }
 
+  /**
+   * it should override toString to reflect the key
+   * */
   public interface ICrypto {
     /**
      * it should return a random config that is different every time

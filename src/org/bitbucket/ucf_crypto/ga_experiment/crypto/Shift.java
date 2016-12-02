@@ -1,11 +1,8 @@
 package org.bitbucket.ucf_crypto.ga_experiment.crypto;
 
-import com.github.beenotung.javalib.Utils;
 import com.github.beenotung.javalib.Utils.ByteArray;
 
-import static com.github.beenotung.javalib.Utils.objectToString;
 import static com.github.beenotung.javalib.Utils.random;
-import static com.github.beenotung.javalib.Utils.randomByte;
 
 public class Shift implements Crypto.ICrypto {
   public static Shift $MODULE = new Shift();
@@ -31,8 +28,18 @@ public class Shift implements Crypto.ICrypto {
 
     @Override
     public String toString() {
-      return "offset=" + offset;
+      return
+        "base=" + base +
+          ", offset=" + offset
+        ;
     }
+  }
+
+  @Override
+  public String toString() {
+    return "Shift{" +
+      config +
+      '}';
   }
 
   private Config config;
@@ -51,25 +58,12 @@ public class Shift implements Crypto.ICrypto {
 
   @Override
   public void preprocess(String plaintext, final ByteArray res) {
-    if (res.data.length < plaintext.length())
-      res.data = new byte[plaintext.length()];
-    res.len = 0;
-    for (byte b : plaintext.getBytes()) {
-      if ('a' <= b && b <= 'z') {
-        res.data[res.len++] = (byte) (b - 'a');
-      } else if ('A' <= b && b <= 'Z') {
-        res.data[res.len++] = (byte) (b - 'A');
-      }
-    }
+    CryptoUtils.string_to_bytes(plaintext, config.base, res);
   }
 
   @Override
   public String postprocess(ByteArray cipher) {
-    char[] cs = new char[cipher.len];
-    for (int i = 0; i < cipher.len; i++) {
-      cs[i] = (char) (cipher.data[i + cipher.offset] + 'a');
-    }
-    return new String(cs);
+    return CryptoUtils.bytes_to_string(cipher, config.base);
   }
 
   @Override
