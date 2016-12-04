@@ -10,7 +10,9 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ThreadLocalRandom;
 
+import static com.github.beenotung.javalib.Utils.$$$;
 import static com.github.beenotung.javalib.Utils.uint;
 
 /**
@@ -26,7 +28,6 @@ public class GACrack implements Crack.ICrack {
   public HashMap<Class, Crack.ICrack> impls = new HashMap<>();
 
   private GACrack() {
-    final int n_pop = 100;
     impls.put(Shift.class, new Crack.ICrack() {
       @Override
       public void crack(Crypto.ICrypto crypto, Crypto.IConfig iConfig, ArrayList<Utils.Pair<ByteArray, ByteArray>> plaintext_cipher_pairs) {
@@ -70,6 +71,7 @@ public class GACrack implements Crack.ICrack {
             };
           }
         };
+        final int n_pop = 100;
         GA ga = new GA(new GA.GARuntime(
           n_pop
           , l_gene
@@ -85,7 +87,8 @@ public class GACrack implements Crack.ICrack {
       }
     });
     impls.put(Affine.class, (crypto, config, plaintext_cipher_pairs) -> {
-        GA.GARuntime gaRuntime = new GA.GARuntime(n_pop, 2, .25f, .8f, .5f, true);
+        final int n_pop = config.base * config.base / 2;
+        GA.GARuntime gaRuntime = new GA.GARuntime(n_pop, 2, .25f, .9f, 1f, true);
         GA.Param param = new GA.Param() {
           @Override
           public GA.IEval I_EVAL() {
@@ -120,10 +123,22 @@ public class GACrack implements Crack.ICrack {
               }
             };
           }
+
+          @Override
+          public GA.ICrossover I_CROSSOVER() {
+            return new GA.ICrossover() {
+              @Override
+              public void crossover(byte[] p1, byte[] p2, byte[] child) {
+//                ThreadLocalRandom r = ThreadLocalRandom.current();
+                child[0] = (byte) ((uint(p1[0]) + uint(p2[0])) / 2);
+                child[1] = (byte) ((uint(p1[1]) + uint(p2[1])) / 2);
+              }
+            };
+          }
         };
         GA ga = new GA(gaRuntime, param);
         ga.init();
-        GA.GAUtils.simpleRestartUntilTargetFitness(ga, 0, .8f, .8f);
+        GA.GAUtils.simpleRestartUntilTargetFitness(ga, 0, .99f, 0.99f);
         ga.useRuntime(gaRuntime1 -> {
           Affine.Config c = (Affine.Config) config;
           byte[] bestGene = gaRuntime.getGeneByRank(0);

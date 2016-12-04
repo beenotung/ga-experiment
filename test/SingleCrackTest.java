@@ -66,9 +66,9 @@ public class SingleCrackTest {
       long best_time = Long.MAX_VALUE;
       long worst_time = Long.MIN_VALUE;
       for (int i = 0; i < n_pair; i++) {
-        long start_time = System.currentTimeMillis();
+        long start_time = System.nanoTime();
         if (crack(cracker, crypto, messages, base)) {
-          long used_time = System.currentTimeMillis() - start_time;
+          long used_time = System.nanoTime() - start_time;
           n_correct++;
           acc_time += used_time;
           best_time = Math.min(used_time, best_time);
