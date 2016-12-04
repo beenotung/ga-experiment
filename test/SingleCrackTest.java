@@ -27,12 +27,12 @@ public class SingleCrackTest {
   }
 
   void crack(Crack.ICrack cracker, String[] messages, int n_pair) {
-    for (byte base : TestConfig.Bases) {
+    for (int base : TestConfig.Bases) {
       crack(cracker, messages, base, n_pair);
     }
   }
 
-  boolean crack(Crack.ICrack cracker, Crypto.ICrypto crypto, String[] messages, byte base) {
+  boolean crack(Crack.ICrack cracker, Crypto.ICrypto crypto, String[] messages, int base) {
     Crypto.IConfig actualKey = crypto.sampleConfig(base);
     Crypto.IConfig guessKey = crypto.sampleConfig(base);
     ArrayList<Pair<ByteArray, ByteArray>> pairs = new ArrayList<>(messages.length);
@@ -56,7 +56,7 @@ public class SingleCrackTest {
     return res;
   }
 
-  void crack(Crack.ICrack cracker, String[] messages, byte base, int n_pair) {
+  void crack(Crack.ICrack cracker, String[] messages, int base, int n_pair) {
     for (Crypto.ICrypto crypto : Crypto.$MODULE.impls) {
       print("\rCracking", n_pair, "pairs", crypto.getClass().getSimpleName(), "by", cracker.getClass().getSimpleName(), "| base:", base);
       out.flush();
@@ -96,7 +96,7 @@ public class SingleCrackTest {
     }
   }
 
-  void crack_old(Crack.ICrack cracker, String[] messages, byte base, int n_pair) {
+  void crack_old(Crack.ICrack cracker, String[] messages, int base, int n_pair) {
     for (int i = 0; i < n_pair; i++) {
       int finalI = i;
       Crypto.$MODULE.impls.forEach(iCrypto -> {
@@ -130,7 +130,7 @@ public class SingleCrackTest {
     }
   }
 
-  Pair<Boolean, Long> crack(final Crack.ICrack cracker, Crypto.ICrypto crypto, final int n_pair, final String message, byte base) {
+  Pair<Boolean, Long> crack(final Crack.ICrack cracker, Crypto.ICrypto crypto, final int n_pair, final String message, int base) {
     print("Cracking", cracker.getClass().getSimpleName(), "with", crypto.getClass().getSimpleName(), "for", n_pair, "pairs on message of length", message.length());
     out.flush();
     out.print('\r');

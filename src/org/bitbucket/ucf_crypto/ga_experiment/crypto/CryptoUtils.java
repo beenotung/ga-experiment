@@ -1,10 +1,9 @@
 package org.bitbucket.ucf_crypto.ga_experiment.crypto;
 
 import com.github.beenotung.javalib.Utils;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import static com.github.beenotung.javalib.Utils.$$$;
-import static com.github.beenotung.javalib.Utils.to_int;
+import static com.github.beenotung.javalib.Utils.uint;
 
 /**
  * Created by beenotung on 12/2/16.
@@ -47,7 +46,7 @@ public class CryptoUtils {
 
   public static void string_to_bytes(String s, int base, final Utils.ByteArray res) {
     res.offset = 0;
-    if (base == 0) {
+    if (base == 256) {
       res.data = s.getBytes();
       res.len = res.data.length;
       return;
@@ -80,7 +79,7 @@ public class CryptoUtils {
       ? byte_to_char36
       : $$$();
     for (int i = 0; i < bs.len; i++) {
-      b.append((char) mapper[to_int(bs.data[i + bs.offset])]);
+      b.append((char) mapper[uint(bs.data[i + bs.offset])]);
     }
     return b.toString();
   }

@@ -42,16 +42,13 @@ public class Shift implements Crypto.ICrypto {
       '}';
   }
 
-  private Config config;
+  public Config config;
 
   @Override
   public <A extends Crypto.IConfig> A sampleConfig(int base) {
     Config res = new Config();
     res.base = base;
-    if (base == 0)
-      res.offset = random.nextInt(256);
-    else
-      res.offset = random.nextInt(res.base);
+    res.offset = random.nextInt(res.base);
     return (A) res;
   }
 
@@ -77,19 +74,8 @@ public class Shift implements Crypto.ICrypto {
     }
     cipher.len = plaintext.len;
     cipher.offset = 0;
-    if (config.base == 0) {
-      for (int i = 0; i < plaintext.len; i++) {
-        cipher.data[i] =
-          (byte) (plaintext.data[i + plaintext.offset]
-            + config.offset);
-      }
-    } else {
-      for (int i = 0; i < plaintext.len; i++) {
-        cipher.data[i] =
-          (byte) ((plaintext.data[i + plaintext.offset]
-            + config.offset)
-            % config.base);
-      }
+    for (int i = 0; i < plaintext.len; i++) {
+      cipher.data[i + cipher.offset] = (byte) ((plaintext.data[i + plaintext.offset] + config.offset) % config.base);
     }
   }
 
@@ -100,22 +86,9 @@ public class Shift implements Crypto.ICrypto {
       plaintext.len = cipher.len;
     }
     plaintext.len = cipher.len;
-
-    if (config.base == 0) {
-      for (int i = 0; i < cipher.len; i++) {
-        plaintext.data[i] =
-          (byte) (cipher.data[i + cipher.offset]
-            - config.offset
-            + config.base);
-      }
-    } else {
-      for (int i = 0; i < cipher.len; i++) {
-        plaintext.data[i] =
-          (byte) ((cipher.data[i + cipher.offset]
-            - config.offset
-            + config.base)
-            % config.base);
-      }
+    plaintext.offset = 0;
+    for (int i = 0; i < cipher.len; i++) {
+      plaintext.data[i + plaintext.offset] = (byte) ((cipher.data[i + cipher.offset] - config.offset + config.base) % config.base);
     }
   }
 }

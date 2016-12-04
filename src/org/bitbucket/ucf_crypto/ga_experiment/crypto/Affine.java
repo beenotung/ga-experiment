@@ -5,7 +5,7 @@ import com.github.beenotung.javalib.Utils;
 import static com.github.beenotung.javalib.Utils.*;
 
 public class Affine implements Crypto.ICrypto {
-  public static Affine $MODULE = new Affine();
+  public static final Affine $MODULE = new Affine();
 
   static {
     Crypto.$MODULE.impls.add($MODULE);
@@ -58,40 +58,29 @@ public class Affine implements Crypto.ICrypto {
   public <A extends Crypto.IConfig> A sampleConfig(int base) {
     Config res = new Config();
     res.base = base;
-    if (base == 0) {
-      res.a = random.nextInt(256);
-      res.b = random.nextInt(256);
-    } else {
-      for (; ; ) {
-        res.a = random.nextInt(res.base);
-        if (gcd(res.a, res.base) == 1) {
-          break;
-        }
+    for (; ; ) {
+      res.a = random.nextInt(res.base) % base;
+      if (gcd(res.a, res.base) == 1) {
+        break;
       }
-      res.b = random.nextInt(res.base);
     }
+    res.b = random.nextInt(res.base) % base;
     return (A) res;
   }
 
   @Override
-  public <A extends Crypto.IConfig> void prepare(A config) {
-    this.config = (Config) config;
+  public <A extends Crypto.IConfig> void prepare(A newConfig) {
+    this.config = (Config) newConfig;
     table = new int[256];
     re_table = new int[256];
-    final int base = this.config.base == 0 ? 256 : this.config.base;
-    if (((Config) config).base == 0) {
-      for (int i = 0; i < 256; i++) {
-        table[i] = mod(i * this.config.a + this.config.b, base);
-      }
-      for (int i = 0; i < 256; i++) {
-        re_table[table[i]] = i;
-      }
-    } else {
-      for (int i = 0; i < 256; i++) {
-        table[i] = mod(i * this.config.a + this.config.b, config.base);
-      }
-      for (int i = 0; i < 256; i++) {
-        re_table[table[i]] = mod(i, config.base);
+    for (int i = 0; i < 256; i++) {
+      table[i] = ((i % config.base) * config.a + config.b) % config.base;
+    }
+    for (int i = 0; i < config.base; i++) {
+      try {
+        re_table[table[i]] = i % config.base;
+      } catch (ArrayIndexOutOfBoundsException e) {
+        e.printStackTrace();
       }
     }
   }
@@ -126,7 +115,7 @@ public class Affine implements Crypto.ICrypto {
     plaintext.offset = 0;
     plaintext.len = cipher.len;
     for (int i = 0; i < cipher.len; i++) {
-      plaintext.data[i] = (byte) re_table[to_int(cipher.data[i + cipher.offset])];
+      plaintext.data[i] = (byte) re_table[uint(cipher.data[i + cipher.offset])];
     }
   }
 }

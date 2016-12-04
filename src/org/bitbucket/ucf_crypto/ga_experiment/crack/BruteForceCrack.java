@@ -32,25 +32,13 @@ public class BruteForceCrack implements Crack.ICrack {
         final Shift.Config c = (Shift.Config) config;
         ByteArray result = new ByteArray(0);
         for (Utils.Pair<ByteArray, ByteArray> plaintext_cipher_pair : plaintext_cipher_pairs) {
-          if (c.base == 0) {
-            for (int i = 0; i < 256; i++) {
-              c.offset =  i;
-              shift.prepare(c);
-              shift.decryp(plaintext_cipher_pair._2, result);
+          for (int i = 0; i < c.base; i++) {
+            c.offset = i;
+            shift.prepare(c);
+            shift.decryp(plaintext_cipher_pair._2, result);
 //            println("plaintext:",plaintext_cipher_pair._1.toString(),"result:",result.toString());
-              if (result.equals(plaintext_cipher_pair._1)) {
-                return;
-              }
-            }
-          } else {
-            for (byte i = 0; i < c.base; i++) {
-              c.offset = i;
-              shift.prepare(c);
-              shift.decryp(plaintext_cipher_pair._2, result);
-//            println("plaintext:",plaintext_cipher_pair._1.toString(),"result:",result.toString());
-              if (result.equals(plaintext_cipher_pair._1)) {
-                return;
-              }
+            if (result.equals(plaintext_cipher_pair._1)) {
+              return;
             }
           }
         }
@@ -60,14 +48,12 @@ public class BruteForceCrack implements Crack.ICrack {
       final Affine affine = (Affine) crypto;
       final Affine.Config c = (Affine.Config) config;
       ByteArray result = new ByteArray(0);
-      final int A = config.base == 0 ? 256 : (config.base);
-      final int B = config.base == 0 ? 256 : (config.base);
-      for (int a = 0; a < A; a++) {
-        if (gcd(a, A) != 1) {
+      for (int a = 0; a < config.base; a++) {
+        if (gcd(a, config.base) != 1) {
           continue;
         }
         c.a = a;
-        for (int b = 0; b < B; b++) {
+        for (int b = 0; b < config.base; b++) {
           c.b = b;
           affine.prepare(c);
           for (Pair<ByteArray, ByteArray> plaintext_cipher_pair : plaintext_cipher_pairs) {

@@ -8,7 +8,7 @@ public class TestConfig {
    * base 36 -> ['a'..'z']++['0'..'9']
    * base 0 -> base 256 -> [0..255] (raw bytes)
    * */
-  public static final byte Bases[] = {26, 36, 0};
+  public static final int Bases[] = {26, 36, 256};
   public static final String[] messages = {
     "This is a short message."
     , "This is a longer message."

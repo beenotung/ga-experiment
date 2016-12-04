@@ -11,8 +11,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static com.github.beenotung.javalib.Utils.mod;
-import static com.github.beenotung.javalib.Utils.to_int;
+import static com.github.beenotung.javalib.Utils.uint;
 
 /**
  * Created by beenotung on 11/30/16.
@@ -49,7 +48,7 @@ public class GACrack implements Crack.ICrack {
                 Shift shift = new Shift();
                 Shift.Config config_local = new Shift.Config();
                 config_local.base = config.base;
-                config_local.offset = gene[0];
+                config_local.offset = uint(gene[0]) % config.base;
                 shift.prepare(config_local);
                 ByteArray result = new ByteArray(0);
                 for (Utils.Pair<ByteArray, ByteArray> plaintext_cipher_pair : plaintext_cipher_pairs) {
@@ -81,9 +80,7 @@ public class GACrack implements Crack.ICrack {
         ga.init();
         GA.GAUtils.simpleRestartUntilTargetFitness(ga, 0f, 0.2f, 1f);
         ga.useRuntime(gaRuntime -> {
-          config.offset = gaRuntime.getGeneByRank(0)[0];
-          if (config.base != 0)
-            config.offset = (byte) mod(config.offset, config.base);
+          config.offset = uint(gaRuntime.getGeneByRank(0)[0]) % config.base;
         });
       }
     });
@@ -99,8 +96,8 @@ public class GACrack implements Crack.ICrack {
                 Affine affine = new Affine();
                 Affine.Config c = new Affine.Config();
                 c.base = config.base;
-                c.a = gene[0];
-                c.b = gene[1];
+                c.a = uint(gene[0]) % c.base;
+                c.b = uint(gene[1]) % c.base;
                 affine.prepare(c);
                 ByteArray result = new ByteArray(plaintext.len);
                 affine.decryp(plaintext_cipher_pair._2, result);
@@ -130,8 +127,8 @@ public class GACrack implements Crack.ICrack {
         ga.useRuntime(gaRuntime1 -> {
           Affine.Config c = (Affine.Config) config;
           byte[] bestGene = gaRuntime.getGeneByRank(0);
-          c.a = bestGene[0];
-          c.b = bestGene[1];
+          c.a = uint(bestGene[0]) % c.base;
+          c.b = uint(bestGene[1]) % c.base;
         });
       }
     );
