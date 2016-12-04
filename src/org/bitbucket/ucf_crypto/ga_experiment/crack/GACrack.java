@@ -10,9 +10,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.ThreadLocalRandom;
 
-import static com.github.beenotung.javalib.Utils.$$$;
 import static com.github.beenotung.javalib.Utils.uint;
 
 /**
@@ -36,6 +34,39 @@ public class GACrack implements Crack.ICrack {
         final float p_crossover = 0.25f;
         final float p_mutate = 0.8f;
         final float a_mutate = 1f;
+        float[] cache_value = new float[config.base];
+        boolean[] cache_flag = new boolean[config.base];
+        Utils.IMap<Integer, Float> cache = new Utils.IMap<Integer, Float>() {
+          @Override
+          public Float get(Integer a) {
+            if (!cache_flag[a]) {
+              float acc = 0;
+              Shift shift = new Shift();
+              Shift.Config config_local = new Shift.Config();
+              config_local.base = config.base;
+              config_local.offset = a;
+              shift.prepare(config_local);
+              ByteArray result = new ByteArray(0);
+              for (Utils.Pair<ByteArray, ByteArray> plaintext_cipher_pair : plaintext_cipher_pairs) {
+                final ByteArray plaintext = plaintext_cipher_pair._1;
+                shift.decryp(plaintext_cipher_pair._2, result);
+                int n;
+                if (plaintext.len != result.len) {
+                  n = Math.min(plaintext.len, result.len);
+                  acc += Math.abs(plaintext.len - result.len) * config.base;
+                } else {
+                  n = plaintext.len;
+                }
+                for (int i = 0; i < n; i++) {
+                  acc += Math.abs(plaintext.data[i + plaintext.offset] - result.data[i + result.offset]);
+                }
+              }
+              cache_value[a] = acc;
+              cache_flag[a] = true;
+            }
+            return cache_value[a];
+          }
+        };
         GA.Param param = new GA.Param() {
           /**
            * hamming distance
@@ -45,28 +76,7 @@ public class GACrack implements Crack.ICrack {
             return new GA.IEval() {
               @Override
               public float eval(byte[] gene) {
-                float acc = 0;
-                Shift shift = new Shift();
-                Shift.Config config_local = new Shift.Config();
-                config_local.base = config.base;
-                config_local.offset = uint(gene[0]) % config.base;
-                shift.prepare(config_local);
-                ByteArray result = new ByteArray(0);
-                for (Utils.Pair<ByteArray, ByteArray> plaintext_cipher_pair : plaintext_cipher_pairs) {
-                  final ByteArray plaintext = plaintext_cipher_pair._1;
-                  shift.decryp(plaintext_cipher_pair._2, result);
-                  int n;
-                  if (plaintext.len != result.len) {
-                    n = Math.min(plaintext.len, result.len);
-                    acc += Math.abs(plaintext.len - result.len) * config.base;
-                  } else {
-                    n = plaintext.len;
-                  }
-                  for (int i = 0; i < n; i++) {
-                    acc += Math.abs(plaintext.data[i + plaintext.offset] - result.data[i + result.offset]);
-                  }
-                }
-                return acc;
+                return cache.get(uint(gene[0]) % config.base);
               }
             };
           }
@@ -87,29 +97,56 @@ public class GACrack implements Crack.ICrack {
       }
     });
     impls.put(Affine.class, (crypto, config, plaintext_cipher_pairs) -> {
-        final int n_pop = config.base * config.base / 2;
+        if (config.base == 256) {
+          int bp = 1;
+        }
+        final int n_pop = Math.max(100, config.base * config.base / 2);
         GA.GARuntime gaRuntime = new GA.GARuntime(n_pop, 2, .25f, .9f, 1f, true);
-        GA.Param param = new GA.Param() {
+        float[][] fitness_cache = new float[config.base][config.base];
+        boolean[][] fitness_cache_flag = new boolean[config.base][config.base];
+        for (int i = 0; i < config.base; i++) {
+          for (int j = 0; j < config.base; j++) {
+            fitness_cache_flag[i][j] = false;
+          }
+        }
+        Utils.IMap2<Integer, Integer, Float> fitness_cacher = new Utils.IMap2<Integer, Integer, Float>() {
           @Override
-          public GA.IEval I_EVAL() {
-            return gene -> {
+          public Float get(Integer a, Integer b) {
+            if (!fitness_cache_flag[a][b]) {
               float acc = 0;
+              Affine affine = new Affine();
+              Affine.Config c = new Affine.Config();
+              c.base = config.base;
+              c.a = a;
+              c.b = b;
+              affine.prepare(c);
+              ByteArray result = new ByteArray(0);
               for (Utils.Pair<ByteArray, ByteArray> plaintext_cipher_pair : plaintext_cipher_pairs) {
                 final ByteArray plaintext = plaintext_cipher_pair._1;
-                Affine affine = new Affine();
-                Affine.Config c = new Affine.Config();
-                c.base = config.base;
-                c.a = uint(gene[0]) % c.base;
-                c.b = uint(gene[1]) % c.base;
-                affine.prepare(c);
-                ByteArray result = new ByteArray(plaintext.len);
                 affine.decryp(plaintext_cipher_pair._2, result);
+
+                acc += (plaintext.len - result.len) * c.base;
+
                 for (int i = 0; i < plaintext.len; i++) {
                   acc += Math.abs(plaintext.data[i + plaintext.offset] - result.data[i + result.offset]);
                 }
               }
-              return acc;
-            };
+              if (c.base == 256) {
+                if (c.a == 41 && c.b == 179) {
+                  int bp = 1;
+                }
+              }
+              fitness_cache[a][b] = acc;
+              fitness_cache_flag[a][b] = true;
+            }
+            return fitness_cache[a][b];
+          }
+        };
+        GA.Param param = new GA.Param() {
+          @Override
+          public GA.IEval I_EVAL() {
+            return gene ->
+              fitness_cacher.get(uint(gene[0]) % config.base, uint(gene[1]) % config.base);
           }
 
           @Override
@@ -138,7 +175,11 @@ public class GACrack implements Crack.ICrack {
         };
         GA ga = new GA(gaRuntime, param);
         ga.init();
-        GA.GAUtils.simpleRestartUntilTargetFitness(ga, 0, .99f, 0.99f);
+        if (config.base == 256) {
+          GA.GAUtils.partialRestartUntilTargetFitness(ga, 0, .9f, 1f);
+        } else {
+          GA.GAUtils.simpleRestartUntilTargetFitness(ga, 0, .9f, 1f);
+        }
         ga.useRuntime(gaRuntime1 -> {
           Affine.Config c = (Affine.Config) config;
           byte[] bestGene = gaRuntime.getGeneByRank(0);
@@ -158,4 +199,6 @@ public class GACrack implements Crack.ICrack {
       throw new NotImplementedException();
     }
   }
+
+
 }

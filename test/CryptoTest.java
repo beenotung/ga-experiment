@@ -1,4 +1,6 @@
+import com.github.beenotung.javalib.Utils;
 import com.github.beenotung.javalib.Utils.ByteArray;
+import org.bitbucket.ucf_crypto.ga_experiment.crack.GACrack;
 import org.bitbucket.ucf_crypto.ga_experiment.crypto.Affine;
 import org.bitbucket.ucf_crypto.ga_experiment.crypto.Crypto;
 import org.bitbucket.ucf_crypto.ga_experiment.crypto.Package;
@@ -6,6 +8,7 @@ import org.bitbucket.ucf_crypto.ga_experiment.crypto.Shift;
 
 import java.util.ArrayList;
 
+import static com.github.beenotung.javalib.Utils.pair;
 import static com.github.beenotung.javalib.Utils.println;
 
 public class CryptoTest {
@@ -53,10 +56,24 @@ public class CryptoTest {
 
     {
 
-      Affine.Config conf = Affine.$MODULE.sampleConfig(0);
-      conf.a = 22;
-      conf.b = 77;
-      $MODULE.validTest(Affine.$MODULE, conf, TestConfig.messages[0]);
+      Affine.Config actualKey = Affine.$MODULE.sampleConfig(256);
+      Affine.Config guessKey = Affine.$MODULE.sampleConfig(256);
+      ArrayList<Utils.Pair<ByteArray, ByteArray>> pairs = new ArrayList<>();
+      ByteArray plaintext = new ByteArray(0);
+      ByteArray cipher = new ByteArray(0);
+
+      actualKey.a = 41;
+      actualKey.b = 179;
+      Affine.$MODULE.preprocess(TestConfig.messages[0], plaintext);
+      Affine.$MODULE.prepare(actualKey);
+      Affine.$MODULE.encryp(plaintext, cipher);
+
+      pairs.add(pair(plaintext, cipher));
+
+      GACrack.$MODULE.crack(Affine.$MODULE, guessKey, pairs);
+
+      println("actual key:", actualKey);
+      println("guess key:", guessKey);
     }
 
     println("end", $MODULE.getClass().getName());
