@@ -1,19 +1,30 @@
 package org.bitbucket.ucf_crypto.ga_experiment.crypto;
 
 import com.github.beenotung.javalib.Utils;
+import com.github.beenotung.javalib.Utils.ByteArray;
+import com.github.beenotung.javalib.Utils.IntArray;
 
 import static com.github.beenotung.javalib.Utils.$$$;
+import static com.github.beenotung.javalib.Utils.map;
 import static com.github.beenotung.javalib.Utils.uint;
 
 /**
  * Created by beenotung on 12/2/16.
  */
 public class CryptoUtils {
+  /**@deprecated */
   public static final byte[] char26_to_byte = new byte[256];
+  /**@deprecated */
   public static final byte[] char36_to_byte = new byte[256];
 
   public static final byte[] byte_to_char26 = new byte[256];
   public static final byte[] byte_to_char36 = new byte[256];
+
+  /*
+  * free from negative value, unlike the charxx_to_byte tables, but same purpose
+  * */
+  public static final int[] char26_to_int = new int[256];
+  public static final int[] char36_to_int = new int[256];
 
   static {
     for (int i = 0; i < 256; i++) {
@@ -26,11 +37,9 @@ public class CryptoUtils {
     }
     for (byte i = 0; i < 26; i++) {
       char36_to_byte[i + 'a'] = i;
-//      char36_to_byte[i + 'A'] = (byte) (i + 26);
       char36_to_byte[i + 'A'] = i;
     }
     for (byte i = 0; i < 10; i++) {
-//      char36_to_byte[i + '0'] = (byte) (i + 26 + 26);
       char36_to_byte[i + '0'] = (byte) (i + 26);
     }
 
@@ -42,9 +51,25 @@ public class CryptoUtils {
         byte_to_char36[i] = (byte) ((i % 36) - 26 + '0');
       }
     }
+
+    /* int version */
+    for (int i = 0; i < 256; i++) {
+      char26_to_int[i] = -1;
+      char36_to_int[i] = -1;
+    }
+    for (int i = 0; i < 26; i++) {
+      char26_to_int[i + 'a'] = i;
+      char26_to_int[i + 'A'] = i;
+      char36_to_int[i + 'a'] = i;
+      char36_to_int[i + 'A'] = i;
+    }
+    for (int i = 0; i < 10; i++) {
+      char36_to_int[i + '0'] = 26 + i;
+    }
   }
 
-  public static void string_to_bytes(String s, int base, final Utils.ByteArray res) {
+  /**@deprecated */
+  public static void string_to_bytes(String s, int base, final ByteArray res) {
     res.offset = 0;
     if (base == 256) {
       res.data = s.getBytes();
@@ -61,14 +86,42 @@ public class CryptoUtils {
       : base == 36
       ? char36_to_byte
       : $$$();
-    for (char c : s.toCharArray()) {
-      if (mapper[c] != -1) {
-        res.data[res.len++] = mapper[c];
+    for (byte b : s.getBytes()) {
+      int i = uint(b);
+      if (mapper[i] != -1) {
+        res.data[res.len++] = mapper[i];
       }
     }
   }
 
-  public static String bytes_to_string(Utils.ByteArray bs, int base) {
+  public static void string_to_ints(String s, int base, final IntArray res) {
+    byte[] bs = s.getBytes();
+    res.offset = 0;
+    if (base == 256) {
+      if (res.data.length < bs.length) {
+        res.data = new int[bs.length];
+      }
+      res.len = bs.length;
+      for (int i = 0; i < bs.length; i++) {
+        res.data[i] = uint(bs[i]);
+      }
+      return;
+    }
+    int[] mapper = base == 26
+      ? char26_to_int
+      : base == 36
+      ? char36_to_int
+      : $$$();
+    res.len = 0;
+    for (int i = 0; i < bs.length; i++) {
+      int b = mapper[uint(bs[i])];
+      if (b != -1) {
+        res.data[res.len++] = b;
+      }
+    }
+  }
+
+  public static String bytes_to_string(ByteArray bs, int base) {
     if (base == 0) {
       return new String(bs.data, bs.offset, bs.len);
     }
@@ -82,5 +135,14 @@ public class CryptoUtils {
       b.append((char) mapper[uint(bs.data[i + bs.offset])]);
     }
     return b.toString();
+  }
+
+  /**
+   * @remark old data will NOT be copied if expanded
+   * */
+  public static void ensure_capacity(ByteArray src, ByteArray dest) {
+    if (dest.data.length < src.len) {
+      dest.data = new byte[src.len];
+    }
   }
 }

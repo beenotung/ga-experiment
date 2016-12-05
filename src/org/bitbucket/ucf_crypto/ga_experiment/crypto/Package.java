@@ -7,5 +7,6 @@ public class Package {
   public static void loadAll() throws ClassNotFoundException {
     Class.forName(Shift.class.getName());
     Class.forName(Affine.class.getName());
+    Class.forName(Substition.class.getName());
   }
 }
