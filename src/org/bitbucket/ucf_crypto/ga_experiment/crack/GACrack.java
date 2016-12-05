@@ -3,14 +3,19 @@ package org.bitbucket.ucf_crypto.ga_experiment.crack;
 import com.github.beenotung.javalib.GA;
 import com.github.beenotung.javalib.Utils;
 import com.github.beenotung.javalib.Utils.ByteArray;
+import com.github.beenotung.javalib.Utils.ThreadLocalStorage;
 import org.bitbucket.ucf_crypto.ga_experiment.crypto.Affine;
 import org.bitbucket.ucf_crypto.ga_experiment.crypto.Crypto;
 import org.bitbucket.ucf_crypto.ga_experiment.crypto.Shift;
+import org.bitbucket.ucf_crypto.ga_experiment.crypto.Substition;
+import sun.nio.cs.ThreadLocalCoders;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static com.github.beenotung.javalib.Utils.concat;
+import static com.github.beenotung.javalib.Utils.not;
 import static com.github.beenotung.javalib.Utils.uint;
 
 /**
@@ -97,9 +102,6 @@ public class GACrack implements Crack.ICrack {
       }
     });
     impls.put(Affine.class, (crypto, config, plaintext_cipher_pairs) -> {
-        if (config.base == 256) {
-          int bp = 1;
-        }
         final int n_pop = Math.max(100, config.base * config.base / 2);
         GA.GARuntime gaRuntime = new GA.GARuntime(n_pop, 2, .25f, .9f, 1f, true);
         float[][] fitness_cache = new float[config.base][config.base];
@@ -188,6 +190,57 @@ public class GACrack implements Crack.ICrack {
         });
       }
     );
+    impls.put(Substition.class, (crypto, solutionConfig, plaintext_cipher_pairs) -> {
+      Substition substition = (Substition) crypto;
+      Substition.Config c = (Substition.Config) solutionConfig;
+      int n_pop = 500;
+      GA.GARuntime initRuntime = new GA.GARuntime(n_pop, c.base, 0.25f, 0.2f, 1f / c.base);
+      ThreadLocalStorage<Substition> substitionThreadLocalStorage = new ThreadLocalStorage<Substition>(() -> new Substition());
+      ThreadLocalStorage<Substition.Config> configThreadLocalCoders = new ThreadLocalStorage<Substition.Config>(() -> substitionThreadLocalStorage.current().sampleConfig(c.base));
+      ThreadLocalStorage<ByteArray> resultThreadLocalStorage = new ThreadLocalStorage<ByteArray>(() -> new ByteArray(0));
+      GA.Param gaParam = new GA.Param() {
+        @Override
+        public GA.IEval I_EVAL() {
+          return gene -> {
+            Substition.Config c = configThreadLocalCoders.current();
+            for (int i = 0; i < c.base; i++) {
+              c.table[i] = uint(gene[i]) % c.base;
+            }
+            for (int i = 0; i < c.base; i++) {
+              c.re_table[c.table[i]] = i;
+            }
+            Substition s = substitionThreadLocalStorage.current();
+            s.prepare(c);
+            ByteArray r = resultThreadLocalStorage.current();
+            float acc = 0;
+            for (Utils.Pair<ByteArray, ByteArray> plaintext_cipher_pair : plaintext_cipher_pairs) {
+              s.decryp(plaintext_cipher_pair._2, r);
+              ByteArray plaintext = plaintext_cipher_pair._1;
+              acc += (r.len - plaintext.len) * c.base;
+              for (int i = 0; i < r.len; i++) {
+                acc += Math.abs(
+                  r.data[i + r.offset]
+                    - plaintext.data[i + plaintext.offset]
+                );
+              }
+            }
+            return acc;
+          };
+        }
+      };
+      GA ga = new GA(initRuntime, gaParam);
+      ga.init();
+      GA.GAUtils.simpleRestartUntilTargetFitness(ga, 0f, 0.9f, 0.9f);
+      ga.useRuntime(gaRuntime -> {
+        byte[] gene = gaRuntime.getGeneByRank(0);
+        for (int i = 0; i < c.base; i++) {
+          c.table[i] = uint(gene[i]);
+        }
+        for (int i = 0; i < c.base; i++) {
+          c.re_table[c.table[i]] = i;
+        }
+      });
+    });
   }
 
   @Override

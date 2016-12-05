@@ -97,7 +97,7 @@ public class SingleCrackTest {
         }
       }, TestConfig.time_limit);
       if (!res) {
-        println("| Failed to crack the key within time limit of:", nano_to_string(TestConfig.time_limit));
+        println("\r| Failed to crack the key within time limit of:", nano_to_string(TestConfig.time_limit));
       }
     } catch (InterruptedException e) {
       e.printStackTrace();
