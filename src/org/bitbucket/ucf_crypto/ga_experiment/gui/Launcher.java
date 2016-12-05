@@ -273,7 +273,16 @@ public class Launcher {
         eventHandler.reset();
       }
       if (keyHandler.m.pressed) {
-        eventHandler.mutate();
+        eventHandler.mutate(1.1f, 1f);
+      }
+      if (keyHandler.n.pressed) {
+        eventHandler.mutate(0.9f, 1f);
+      }
+      if (keyHandler.j.pressed) {
+        eventHandler.mutate(1f, 0.9f);
+      }
+      if (keyHandler.k.pressed) {
+        eventHandler.mutate(1f, 1.1f);
       }
       if (keyHandler.closeBracket.pressed) {
         eventHandler.change_n_pop(1);
@@ -337,9 +346,15 @@ public class Launcher {
     }
 
     void reset() {
+      ga.reset();
     }
 
-    void mutate() {
+    void mutate(float p_rate, float a_rate) {
+      ga.useRuntime(gaRuntime -> {
+        gaRuntime.p_mutation *= p_rate;
+        gaRuntime.a_mutation *= a_rate;
+        println("new p_mutation:", gaRuntime.p_mutation, "\t new a_mutation:", gaRuntime.a_mutation);
+      });
     }
 
     void step() {
