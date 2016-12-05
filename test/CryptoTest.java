@@ -9,15 +9,16 @@ import org.bitbucket.ucf_crypto.ga_experiment.crypto.Shift;
 import java.util.ArrayList;
 
 import static com.github.beenotung.javalib.Utils.pair;
+import static com.github.beenotung.javalib.Utils.print;
 import static com.github.beenotung.javalib.Utils.println;
 
 public class CryptoTest {
   public static CryptoTest $MODULE = new CryptoTest();
 
   boolean validTest(Crypto.ICrypto crypto, Crypto.IConfig config, String message) {
+    print("testing", crypto.getClass().getSimpleName(),"...");
     crypto.prepare(config);
-
-    println('\t', crypto.toString());
+    println("\n ", crypto.toString());
 
     int length = message.length();
 

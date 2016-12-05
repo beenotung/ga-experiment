@@ -5,6 +5,7 @@ import com.github.beenotung.javalib.Utils.ByteArray;
 import org.bitbucket.ucf_crypto.ga_experiment.crypto.Affine;
 import org.bitbucket.ucf_crypto.ga_experiment.crypto.Crypto;
 import org.bitbucket.ucf_crypto.ga_experiment.crypto.Shift;
+import org.bitbucket.ucf_crypto.ga_experiment.crypto.Substition;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.ArrayList;
@@ -59,6 +60,29 @@ public class BruteForceCrack implements Crack.ICrack {
           for (Pair<ByteArray, ByteArray> plaintext_cipher_pair : plaintext_cipher_pairs) {
             affine.decryp(plaintext_cipher_pair._2, result);
             if (plaintext_cipher_pair._1.equals(result)) {
+              return;
+            }
+          }
+        }
+      }
+    });
+    impls.put(Substition.class, (crypto, solutionConfig, plaintext_cipher_pairs) -> {
+      final Substition substition = (Substition) crypto;
+      final Substition.Config c = (Substition.Config) solutionConfig;
+      String keyBase = "";
+      String key;
+      Substition.Config guessKey;
+      ByteArray result = new ByteArray(0);
+      for (; ; ) {
+        for (int i = 0; i < 26; i++) {
+          key = keyBase + ('a' + i);
+          guessKey = Substition.gen_key_from_string(key, c.base);
+          substition.prepare(guessKey);
+          for (Pair<ByteArray, ByteArray> plaintext_cipher_pair : plaintext_cipher_pairs) {
+            substition.decryp(plaintext_cipher_pair._2, result);
+            if (plaintext_cipher_pair._1.equals(result)) {
+              c.table = guessKey.table;
+              c.re_table = guessKey.re_table;
               return;
             }
           }

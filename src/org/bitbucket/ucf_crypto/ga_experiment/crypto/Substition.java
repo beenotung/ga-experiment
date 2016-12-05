@@ -2,12 +2,11 @@ package org.bitbucket.ucf_crypto.ga_experiment.crypto;
 
 import com.github.beenotung.javalib.Utils;
 import org.bitbucket.ucf_crypto.ga_experiment.crypto.Crypto;
+import sun.security.krb5.internal.CredentialsUtil;
 
 import java.util.Arrays;
 
-import static com.github.beenotung.javalib.Utils.arrayToString;
-import static com.github.beenotung.javalib.Utils.random;
-import static com.github.beenotung.javalib.Utils.uint;
+import static com.github.beenotung.javalib.Utils.*;
 import static org.bitbucket.ucf_crypto.ga_experiment.crypto.CryptoUtils.ensure_capacity;
 
 public class Substition implements Crypto.ICrypto {
@@ -27,13 +26,28 @@ public class Substition implements Crypto.ICrypto {
   }
 
   public static class Config extends Crypto.IConfig {
-    int[] table;
-    int[] re_table;
+    public int[] table;
+    public int[] re_table;
 
     @Override
     public String toString() {
-      return
-        "table=" + arrayToString(table);
+      if (base == 256) {
+        StringBuilder b = new StringBuilder();
+        b.append("key=");
+        b.append(arrayToString(table));
+        return b.toString();
+      } else {
+        char[] key = new char[base];
+        byte[] mapper = base == 26
+          ? CryptoUtils.byte_to_char26
+          : base == 36
+          ? CryptoUtils.byte_to_char36
+          : $$$();
+        for (int i = 0; i < base; i++) {
+          key[i] = (char) mapper[table[i]];
+        }
+        return "key=" + String.valueOf(key);
+      }
     }
 
     @Override
@@ -58,13 +72,12 @@ public class Substition implements Crypto.ICrypto {
     c.table = new int[base];
     c.re_table = new int[base];
     boolean[] flag = new boolean[base];
-    final byte[] bs = s.getBytes();
+    IntArray is = new IntArray(0);
+    CryptoUtils.string_to_ints(s, base, is);
     int i = 0;
-    for (byte b_ : bs) {
-      int b = uint(b_);
-      if (flag[b]) {
+    for (int b : is.data) {
+      if (flag[b])
         continue;
-      }
       c.table[i++] = b;
       flag[b] = true;
     }
