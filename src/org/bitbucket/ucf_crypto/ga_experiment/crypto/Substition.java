@@ -1,13 +1,10 @@
 package org.bitbucket.ucf_crypto.ga_experiment.crypto;
 
 import com.github.beenotung.javalib.Utils;
-import org.bitbucket.ucf_crypto.ga_experiment.crypto.Crypto;
-import sun.security.krb5.internal.CredentialsUtil;
 
 import java.util.Arrays;
 
 import static com.github.beenotung.javalib.Utils.*;
-import static org.bitbucket.ucf_crypto.ga_experiment.crypto.CryptoUtils.ensure_capacity;
 
 public class Substition implements Crypto.ICrypto {
   public static Substition $MODULE = new Substition();
@@ -135,21 +132,21 @@ public class Substition implements Crypto.ICrypto {
 
   @Override
   public void encryp(Utils.ByteArray plaintext, Utils.ByteArray cipher) {
-    ensure_capacity(plaintext, cipher);
+    ensure_capacity(cipher, plaintext.len);
     cipher.offset = 0;
     cipher.len = plaintext.len;
     for (int i = 0; i < plaintext.len; i++) {
-      cipher.data[i] = (byte) config.table[uint(plaintext.data[i + plaintext.offset])];
+      cipher.data[i] = (byte) config.table[uint(plaintext.data[i + plaintext.offset]) % config.base];
     }
   }
 
   @Override
   public void decryp(Utils.ByteArray cipher, Utils.ByteArray plaintext) {
-    ensure_capacity(cipher, plaintext);
+    ensure_capacity(plaintext, cipher.len);
     plaintext.offset = 0;
     plaintext.len = cipher.len;
     for (int i = 0; i < cipher.len; i++) {
-      plaintext.data[i] = (byte) config.re_table[uint(cipher.data[i + cipher.offset])];
+      plaintext.data[i] = (byte) config.re_table[uint(cipher.data[i + cipher.offset]) % config.base];
     }
   }
 }

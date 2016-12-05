@@ -2,12 +2,10 @@ package org.bitbucket.ucf_crypto.ga_experiment.crack;
 
 import com.github.beenotung.javalib.Utils;
 import com.github.beenotung.javalib.Utils.ByteArray;
-import org.bitbucket.ucf_crypto.ga_experiment.crypto.Affine;
-import org.bitbucket.ucf_crypto.ga_experiment.crypto.Crypto;
-import org.bitbucket.ucf_crypto.ga_experiment.crypto.Shift;
-import org.bitbucket.ucf_crypto.ga_experiment.crypto.Substition;
+import org.bitbucket.ucf_crypto.ga_experiment.crypto.*;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -24,6 +22,25 @@ public class BruteForceCrack implements Crack.ICrack {
   }
 
   HashMap<Class, Crack.ICrack> impls = new HashMap<>();
+
+  static String gen_string(BigInteger seed, int len, int base) {
+    BigInteger b256 = new BigInteger("256");
+    char[] mapper = base == 256
+      ? CryptoUtils.char256
+      : base == 26
+      ? CryptoUtils.char26_cycle
+      : base == 36
+      ? CryptoUtils.char36_cycle
+      : $$$();
+
+    char[] cs = new char[len];
+    for (int i = cs.length - 1; i >= 0; i--) {
+      BigInteger c = seed.mod(b256);
+      cs[i] = mapper[c.intValue()];
+      seed = seed.subtract(c).divide(b256);
+    }
+    return String.valueOf(cs);
+  }
 
   private BruteForceCrack() {
     impls.put(Shift.class, new Crack.ICrack() {
@@ -69,23 +86,26 @@ public class BruteForceCrack implements Crack.ICrack {
     impls.put(Substition.class, (crypto, solutionConfig, plaintext_cipher_pairs) -> {
       final Substition substition = (Substition) crypto;
       final Substition.Config c = (Substition.Config) solutionConfig;
-      String keyBase = "";
       String key;
       Substition.Config guessKey;
       ByteArray result = new ByteArray(0);
-      for (; ; ) {
-        for (int i = 0; i < 26; i++) {
-          key = keyBase + ('a' + i);
-          guessKey = Substition.gen_key_from_string(key, c.base);
-          substition.prepare(guessKey);
-          for (Pair<ByteArray, ByteArray> plaintext_cipher_pair : plaintext_cipher_pairs) {
-            substition.decryp(plaintext_cipher_pair._2, result);
-            if (plaintext_cipher_pair._1.equals(result)) {
-              c.table = guessKey.table;
-              c.re_table = guessKey.re_table;
-              return;
-            }
+      BigInteger seed = new BigInteger("0");
+      for (int i = 0; i < Math.pow(c.base, c.base); i++) {
+        key = gen_string(seed, c.base, c.base);
+        guessKey = Substition.gen_key_from_string(key, c.base);
+        seed = seed.add(BigInteger.ONE);
+        substition.prepare(guessKey);
+        int n_found = 0;
+        for (Pair<ByteArray, ByteArray> plaintext_cipher_pair : plaintext_cipher_pairs) {
+          substition.decryp(plaintext_cipher_pair._2, result);
+          if (plaintext_cipher_pair._1.equals(result)) {
+            n_found++;
           }
+        }
+        if (n_found == plaintext_cipher_pairs.size()) {
+          c.table = guessKey.table;
+          c.re_table = guessKey.re_table;
+          return;
         }
       }
     });

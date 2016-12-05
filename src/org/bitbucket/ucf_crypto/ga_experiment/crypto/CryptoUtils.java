@@ -4,9 +4,7 @@ import com.github.beenotung.javalib.Utils;
 import com.github.beenotung.javalib.Utils.ByteArray;
 import com.github.beenotung.javalib.Utils.IntArray;
 
-import static com.github.beenotung.javalib.Utils.$$$;
-import static com.github.beenotung.javalib.Utils.map;
-import static com.github.beenotung.javalib.Utils.uint;
+import static com.github.beenotung.javalib.Utils.*;
 
 /**
  * Created by beenotung on 12/2/16.
@@ -25,6 +23,12 @@ public class CryptoUtils {
   * */
   public static final int[] char26_to_int = new int[256];
   public static final int[] char36_to_int = new int[256];
+
+  /* for generic string generation */
+  public static final char[] char26_cycle = new char[256];
+  public static final char[] char36_cycle = new char[256];
+  /* to eliminate edge case */
+  public static final char[] char256 = new char[256];
 
   static {
     for (int i = 0; i < 256; i++) {
@@ -65,6 +69,23 @@ public class CryptoUtils {
     }
     for (int i = 0; i < 10; i++) {
       char36_to_int[i + '0'] = 26 + i;
+    }
+
+    /* for generic string generation */
+    for (int i = 0; i < 26; i++) {
+      char26_cycle[i] = (char) ('a' + i);
+      char36_cycle[i] = (char) ('a' + i);
+    }
+    for (int i = 0; i < 10; i++) {
+      char36_cycle[26 + i] = (char) ('0' + i);
+    }
+    for (int i = 26; i < 256; i++) {
+      char26_cycle[i] = char26_cycle[i % 26];
+      char36_cycle[i] = char36_cycle[i % 36];
+    }
+    /* eliminate edge case */
+    for (int i = 0; i < 256; i++) {
+      char256[i] = (char) i;
     }
   }
 
@@ -112,6 +133,7 @@ public class CryptoUtils {
       : base == 36
       ? char36_to_int
       : $$$();
+    ensure_capacity(res, bs.length);
     res.len = 0;
     for (int i = 0; i < bs.length; i++) {
       int b = mapper[uint(bs[i])];
@@ -135,14 +157,5 @@ public class CryptoUtils {
       b.append((char) mapper[uint(bs.data[i + bs.offset])]);
     }
     return b.toString();
-  }
-
-  /**
-   * @remark old data will NOT be copied if expanded
-   * */
-  public static void ensure_capacity(ByteArray src, ByteArray dest) {
-    if (dest.data.length < src.len) {
-      dest.data = new byte[src.len];
-    }
   }
 }

@@ -1,3 +1,5 @@
+import com.github.beenotung.javalib.Utils;
+
 /**
  * Created by beenotung on 11/30/16.
  */
@@ -13,4 +15,5 @@ public class TestConfig {
     "This is a short message."
     , "This is a longer message."
   };
+  public static long time_limit = Utils.NANO_IN_SECOND * 10;
 }
