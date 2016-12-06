@@ -25,6 +25,11 @@ Therefore, the gene is 256 byte as reversed mapping table.
 | C | Compare Mode |
 | G | GA Mode |
 
+## Command Control
+(type then hit Enter)
+ - npop
+   - Example: "npop:1024"
+
 ## Compare Mode
  - left hand side
    - show source image

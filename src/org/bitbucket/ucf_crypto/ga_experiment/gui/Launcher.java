@@ -10,6 +10,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static com.github.beenotung.javalib.Utils.*;
@@ -18,9 +19,10 @@ import static com.github.beenotung.javalib.Utils.*;
  * Created by beenotung on 12/5/16.
  */
 public class Launcher {
-  public static int MIN_NPOP = 5;
-  public static int MAX_N_POP = 100;
-  public static int INIT_N_POP = 10;
+  public static final int MIN_NPOP = 5;
+  public static final int MAX_N_POP = 10240;
+  public static int PREFER_N_POP;
+  public static final int INIT_N_POP = 10;
 
   private final int[] source_pixels;//RGBArray
   private final int[] encryp_pixels;//RGBArray
@@ -65,8 +67,7 @@ public class Launcher {
     }
     n_grid_in_x = Screen.WIDTH / grid_width;
     n_grid_in_y = Screen.HEIGHT / grid_height;
-    MAX_N_POP = n_grid_in_x * n_grid_in_y;
-    MAX_N_POP = 2048;
+    PREFER_N_POP = n_grid_in_x * n_grid_in_y;
     source_pixels = new int[grid_width * grid_height];
     encryp_pixels = new int[grid_width * grid_height];
     source_rgbArray = new int[grid_width * grid_height * 3];
@@ -110,6 +111,12 @@ public class Launcher {
           for (int i = 0; i < source_rgbArray.length; i++) {
             acc += Math.abs((source_rgbArray[i] - rgbArray[i]) % 256);
           }
+          if (acc == 0) {
+            println("key found");
+            println("gene:", Arrays.toString(gene));
+            println("key:", Arrays.toString(table));
+            System.exit(0);
+          }
           return acc;
         };
       }
@@ -144,6 +151,9 @@ public class Launcher {
                 gene[i] ^= ga_round;
               }
             }
+            /* at least mutate one chromosome */
+//            gene[(i_seq = (i_seq + 1) % gaRuntime.l_gene)] ^= randomByte();
+            gene[(i_seq = (i_seq + 1) % gaRuntime.l_gene)] = randomByte();
           }
         };
       }
@@ -151,6 +161,8 @@ public class Launcher {
     ga = new GA(initRuntime, gaParam);
     ga.init();
   }
+
+  int i_seq = 0;
 
   void gene_to_table(byte[] gene, int[] table) {
     for (int i = 0; i < 256; i++) {
@@ -350,17 +362,31 @@ public class Launcher {
 
     @Override
     protected void myDebugInfo() {
-      super.myDebugInfo();
+//      super.myDebugInfo();
+      ga.useRuntime(gaRuntime -> {
+        println("best fitness:", gaRuntime.getFitnessByRank(0));
+      });
     }
   }
 
   class EventHandler {
     void handleCommand(String line) {
       println("handle command:", line);
-      if (line.equals("start")) {
-        /* TODO start ga */
-      } else if (line.equals("pause")) {
-        /* TODO pause */
+      String[] xs = line.split(":");
+      if (xs.length == 2) {
+        if (xs[0].equals("npop")) {
+          try {
+            int newVal = Integer.parseInt(xs[1]);
+            if (newVal >= MIN_NPOP && newVal <= MAX_N_POP) {
+              ga.update_n_pop(newVal);
+              println("change npop to:", newVal);
+            } else {
+              println("invalid npop value:", newVal);
+            }
+          } catch (NumberFormatException e) {
+            e.printStackTrace();
+          }
+        }
       }
     }
 
