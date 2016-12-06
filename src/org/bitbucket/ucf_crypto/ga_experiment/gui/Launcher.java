@@ -65,7 +65,7 @@ public class Launcher {
     n_grid_in_x = Screen.WIDTH / grid_width;
     n_grid_in_y = Screen.HEIGHT / grid_height;
     MAX_N_POP = n_grid_in_x * n_grid_in_y;
-    MAX_N_POP = 1000;
+    MAX_N_POP = 2048;
     source_pixels = new int[grid_width * grid_height];
     encryp_pixels = new int[grid_width * grid_height];
     source_rgbArray = new int[grid_width * grid_height * 3];
@@ -86,12 +86,13 @@ public class Launcher {
       INIT_N_POP
       , 256
       , 0.25f
-      , 0.8f
       , 0.2f
+      , 0.12f
       , true
     );
     ThreadLocalStorage<int[]> rgbArrayThreadLocalStorage = new ThreadLocalStorage<int[]>(() -> new int[grid_height * grid_width * 3]);
     ThreadLocalStorage<int[]> tableThreadLocalStorage = new ThreadLocalStorage<int[]>(() -> new int[256]);
+    ThreadLocalStorage<int[]> re_tableThreadLocalStorage = new ThreadLocalStorage<int[]>(() -> new int[256]);
     GA.Param gaParam = new GA.Param() {
       @Override
       public GA.IEval I_EVAL() {
@@ -99,12 +100,14 @@ public class Launcher {
           float acc = 0;
           int[] rgbArray = rgbArrayThreadLocalStorage.current();
           int[] table = tableThreadLocalStorage.current();
-          map_rgbArray(table, encryp_rgbArray, rgbArray);
-          for (int i = 0; i < encryp_rgbArray.length; i++) {
-            acc += Math.min(
-              Math.abs((encryp_rgbArray[i] - rgbArray[i]) % 256)
-              , Math.abs((rgbArray[i] - encryp_rgbArray[i]) % 256)
-            );
+          int[] re_table = re_tableThreadLocalStorage.current();
+          gene_to_table(gene, table);
+          for (int i = 0; i < 256; i++) {
+            re_table[table[i]] = i;
+          }
+          map_rgbArray(re_table, encryp_rgbArray, rgbArray);
+          for (int i = 0; i < source_rgbArray.length; i++) {
+            acc += Math.abs((source_rgbArray[i] - rgbArray[i]) % 256);
           }
           return acc;
         };
@@ -228,7 +231,7 @@ public class Launcher {
           int[] pixels = new int[grid_width * grid_height];
           int[] table = new int[256];
           for (int i_rank = 0; i_rank < n; i_rank++) {
-            println("drawing rank", i_rank);
+//            println("drawing rank", i_rank);
             i_grid_x++;
             if (i_grid_x == n_grid_in_x) {
               i_grid_x = 0;
@@ -236,7 +239,11 @@ public class Launcher {
             }
             byte[] gene = gaRuntime.getGeneByRank(i_rank);
             gene_to_table(gene, table);
-            map_pixels(table, encryp_pixels, pixels);
+            int[] re_table = new int[256];
+            for (int i = 0; i < 256; i++) {
+              re_table[table[i]] = i;
+            }
+            map_pixels(re_table, encryp_pixels, pixels);
             for (int x = 0; x < grid_width; x++) {
               for (int y = 0; y < grid_height; y++) {
                 screen.add(
@@ -246,7 +253,7 @@ public class Launcher {
                 );
               }
             }
-            println("finished drawing rank", i_rank);
+//            println("finished drawing rank", i_rank);
           }
         });
       } else {
