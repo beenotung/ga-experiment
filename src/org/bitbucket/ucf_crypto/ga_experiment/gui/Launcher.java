@@ -87,8 +87,8 @@ public class Launcher {
       INIT_N_POP
       , 256
       , 0.25f
-      , 0.2f
-      , 0.12f
+      , 0.25f
+      , 0.012f
       , true
     );
     ThreadLocalStorage<int[]> rgbArrayThreadLocalStorage = new ThreadLocalStorage<int[]>(() -> new int[grid_height * grid_width * 3]);
@@ -134,19 +134,19 @@ public class Launcher {
         };
       }
 
-//      @Override
-//      public GA.IMutation I_MUTATION() {
-//        return new GA.IMutation() {
-//          @Override
-//          public void mutation(GA.GARuntime gaRuntime, byte[] gene, ThreadLocalRandom r) {
-//            fir
-//            for (int i = 0; i < r.nextFloat() * gaRuntime.a_mutation; i++) {
-//
-//            }
-//            gene[r.nextInt(gaRuntime.l_gene)] &= r.nextInt();
-//          }
-//        };
-//      }
+      @Override
+      public GA.IMutation I_MUTATION() {
+        return new GA.IMutation() {
+          @Override
+          public void mutation(GA.GARuntime gaRuntime, byte[] gene, ThreadLocalRandom r) {
+            for (int i = 0; i < gaRuntime.l_gene; i++) {
+              if (r.nextFloat() < gaRuntime.a_mutation) {
+                gene[i] ^= ga_round;
+              }
+            }
+          }
+        };
+      }
     };
     ga = new GA(initRuntime, gaParam);
     ga.init();
