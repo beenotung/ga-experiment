@@ -127,14 +127,21 @@ public class Launcher {
           @Override
           public void crossover(byte[] p1, byte[] p2, byte[] child) {
             ThreadLocalRandom r = ThreadLocalRandom.current();
-            final int n = p1.length / 2;
-            for (int i = 0; i < n; i++) {
-              if (r.nextBoolean()) {
-                child[i * 2] = p1[i * 2];
-                child[i * 2 + 1] = p1[i * 2 + 1];
+//            final int n = p1.length / 2;
+//            for (int i = 0; i < n; i++) {
+//              if (r.nextBoolean()) {
+//                child[i * 2] = p1[i * 2];
+//                child[i * 2 + 1] = p1[i * 2 + 1];
+//              } else {
+//                child[i * 2] = p2[i * 2];
+//                child[i * 2 + 1] = p2[i * 2 + 1];
+//              }
+//            }
+            for (int i = 0; i < child.length; i++) {
+              if (random.nextBoolean()) {
+                child[i] = p1[i];
               } else {
-                child[i * 2] = p2[i * 2];
-                child[i * 2 + 1] = p2[i * 2 + 1];
+                child[i] = p2[i];
               }
             }
           }
@@ -146,14 +153,14 @@ public class Launcher {
         return new GA.IMutation() {
           @Override
           public void mutation(GA.GARuntime gaRuntime, byte[] gene, ThreadLocalRandom r) {
-            for (int i = 0; i < gaRuntime.l_gene; i++) {
-              if (r.nextFloat() < gaRuntime.a_mutation) {
-                gene[i] ^= ga_round;
-              }
-            }
             /* at least mutate one chromosome */
-//            gene[(i_seq = (i_seq + 1) % gaRuntime.l_gene)] ^= randomByte();
-            gene[(i_seq = (i_seq + 1) % gaRuntime.l_gene)] = randomByte();
+            int n = (int) Math.max(1, r.nextFloat() * gaRuntime.l_gene * gaRuntime.a_mutation);
+            for (int i = 0; i < n; i++) {
+//              gene[r.nextInt(gaRuntime.l_gene)] ^= r.nextInt();
+              gene[r.nextInt(gaRuntime.l_gene)] = (byte) r.nextInt();
+//              gene[r.nextInt(gaRuntime.l_gene)] += (r.nextInt(2) * 2 - 1) * (r.nextInt(8) + 1);
+//              gene[r.nextInt(gaRuntime.l_gene)] += (r.nextInt(2) * 2 - 1);
+            }
           }
         };
       }
@@ -164,7 +171,7 @@ public class Launcher {
 
   int i_seq = 0;
 
-  void gene_to_table(byte[] gene, int[] table) {
+  void gene_to_table_safe(byte[] gene, int[] table) {
     for (int i = 0; i < 256; i++) {
       table[i] = i;
     }
@@ -176,6 +183,25 @@ public class Launcher {
       table[a] = table[b];
       table[b] = t;
     }
+  }
+
+  void gene_to_table(byte[] gene, int[] table) {
+    boolean[] flag = new boolean[256];
+    int i = 0;
+    int b;
+    for (byte bb : gene) {
+      b = uint(bb);
+      if (!flag[b]) {
+        table[i++] = b;
+        flag[b] = true;
+      }
+    }
+    for (b = 0; b < 256; b++) {
+      if (!flag[b]) {
+        table[i++] = b;
+      }
+    }
+//    gene_to_table_safe(gene,table);
   }
 
   public void start() {
@@ -360,11 +386,18 @@ public class Launcher {
 //      super.mouseHandling();
     }
 
+    int[] guessTable = new int[256];
+
     @Override
     protected void myDebugInfo() {
 //      super.myDebugInfo();
       ga.useRuntime(gaRuntime -> {
-        println("best fitness:", gaRuntime.getFitnessByRank(0));
+        println("round:", ga_round, "| best fitness:", gaRuntime.getFitnessByRank(0));
+        println("real key:", real_key);
+//        println("real key:", Arrays.toString(real_key));
+        gene_to_table(gaRuntime.getGeneByRank(0), guessTable);
+        println("best key:", guessTable);
+//        println("best key:", Arrays.toString(guessTable));
       });
     }
   }
@@ -396,7 +429,8 @@ public class Launcher {
         println("init_encryp");
       /* gen random key */
         byte[] gene = randomBytes(256);
-        gene_to_table(gene, real_key);
+        gene_to_table_safe(gene, real_key);
+//        gene_to_table(gene, real_key);
         for (int i = 0; i < 256; i++) {
           real_re_key[real_key[i]] = i;
         }
