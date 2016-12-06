@@ -10,6 +10,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static com.github.beenotung.javalib.Utils.*;
 
@@ -112,6 +113,40 @@ public class Launcher {
           return acc;
         };
       }
+
+      @Override
+      public GA.ICrossover I_CROSSOVER() {
+        return new GA.ICrossover() {
+          @Override
+          public void crossover(byte[] p1, byte[] p2, byte[] child) {
+            ThreadLocalRandom r = ThreadLocalRandom.current();
+            final int n = p1.length / 2;
+            for (int i = 0; i < n; i++) {
+              if (r.nextBoolean()) {
+                child[i * 2] = p1[i * 2];
+                child[i * 2 + 1] = p1[i * 2 + 1];
+              } else {
+                child[i * 2] = p2[i * 2];
+                child[i * 2 + 1] = p2[i * 2 + 1];
+              }
+            }
+          }
+        };
+      }
+
+//      @Override
+//      public GA.IMutation I_MUTATION() {
+//        return new GA.IMutation() {
+//          @Override
+//          public void mutation(GA.GARuntime gaRuntime, byte[] gene, ThreadLocalRandom r) {
+//            fir
+//            for (int i = 0; i < r.nextFloat() * gaRuntime.a_mutation; i++) {
+//
+//            }
+//            gene[r.nextInt(gaRuntime.l_gene)] &= r.nextInt();
+//          }
+//        };
+//      }
     };
     ga = new GA(initRuntime, gaParam);
     ga.init();
@@ -122,9 +157,9 @@ public class Launcher {
       table[i] = i;
     }
     int t, a, b;
-    for (int i = 1; i < 256; i++) {
-      a = uint(gene[i - 1]);
-      b = uint(gene[i]);
+    for (int i = 0; i < gene.length / 2; i++) {
+      a = uint(gene[2 * i]);
+      b = uint(gene[2 * i + 1]);
       t = table[a];
       table[a] = table[b];
       table[b] = t;
