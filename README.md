@@ -8,7 +8,7 @@ Find the turning point when GA is better traditional cryptanalysis.
 ## Involve crypto algorithms
  - [x] Shift
  - [x] Affine
- - [ ] Substitution
+ - [x] Substitution
  - [ ] Playfair
  - [ ] ADFGVX
  - [ ] Transposition
@@ -27,7 +27,8 @@ Find the turning point when GA is better traditional cryptanalysis.
  1. [x] Implement GA bare-bone
  2. [ ] Single algorithm
     1. [x] Use GA to crack the key, measure time used
-    2. [ ] Use traditional cryptanalysis to crack the key, stop when excess 1.5 times time used by GA
+    2. [x] Use brute-force to crack the key, stop when excess 10 seconds.
+    3. [ ] Use traditional cryptanalysis to crack the key, stop when excess 1.5 times time used by GA
  3. [ ] Combination of two to three algorithms
     1. [ ] Use GA to crack the key, measure time used
     2. [ ] Use traditional cryptanalysis to crack the key, stop when excess 1.5 times time used by GA
