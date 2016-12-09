@@ -1,4 +1,4 @@
-package org.bitbucket.ucf_crypto.ga_experiment.gui;
+package com.github.beenotung.ga_experiment.gui;
 
 import com.github.beenotung.javalib.GA;
 import com.github.beenotung.javalib.GraphicUtils.Screen;

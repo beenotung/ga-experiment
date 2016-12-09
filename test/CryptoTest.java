@@ -1,10 +1,9 @@
 import com.github.beenotung.javalib.Utils;
 import com.github.beenotung.javalib.Utils.ByteArray;
-import org.bitbucket.ucf_crypto.ga_experiment.crack.GACrack;
-import org.bitbucket.ucf_crypto.ga_experiment.crypto.Affine;
-import org.bitbucket.ucf_crypto.ga_experiment.crypto.Crypto;
-import org.bitbucket.ucf_crypto.ga_experiment.crypto.Package;
-import org.bitbucket.ucf_crypto.ga_experiment.crypto.Shift;
+import com.github.beenotung.ga_experiment.crack.GACrack;
+import com.github.beenotung.ga_experiment.crypto.Affine;
+import com.github.beenotung.ga_experiment.crypto.Crypto;
+import com.github.beenotung.ga_experiment.crypto.Package;
 
 import java.util.ArrayList;
 

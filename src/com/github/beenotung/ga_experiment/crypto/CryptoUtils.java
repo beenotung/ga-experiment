@@ -1,4 +1,4 @@
-package org.bitbucket.ucf_crypto.ga_experiment.crypto;
+package com.github.beenotung.ga_experiment.crypto;
 
 import com.github.beenotung.javalib.Utils;
 import com.github.beenotung.javalib.Utils.ByteArray;

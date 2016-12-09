@@ -1,4 +1,4 @@
-import org.bitbucket.ucf_crypto.ga_experiment.crypto.Substition;
+import com.github.beenotung.ga_experiment.crypto.Substition;
 
 /**
  * Created by beenotung on 12/4/16.

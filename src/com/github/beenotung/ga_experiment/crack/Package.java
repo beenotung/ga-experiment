@@ -1,4 +1,4 @@
-package org.bitbucket.ucf_crypto.ga_experiment.crack;
+package com.github.beenotung.ga_experiment.crack;
 
 /**
  * Created by beenotung on 11/30/16.

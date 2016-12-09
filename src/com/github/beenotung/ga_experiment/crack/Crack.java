@@ -1,7 +1,7 @@
-package org.bitbucket.ucf_crypto.ga_experiment.crack;
+package com.github.beenotung.ga_experiment.crack;
 
 import com.github.beenotung.javalib.Utils;
-import org.bitbucket.ucf_crypto.ga_experiment.crypto.Crypto;
+import com.github.beenotung.ga_experiment.crypto.Crypto;
 
 import java.util.ArrayList;
 

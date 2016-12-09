@@ -1,21 +1,18 @@
-package org.bitbucket.ucf_crypto.ga_experiment.crack;
+package com.github.beenotung.ga_experiment.crack;
 
+import com.github.beenotung.ga_experiment.crypto.Affine;
+import com.github.beenotung.ga_experiment.crypto.Shift;
+import com.github.beenotung.ga_experiment.crypto.Substition;
 import com.github.beenotung.javalib.GA;
 import com.github.beenotung.javalib.Utils;
 import com.github.beenotung.javalib.Utils.ByteArray;
 import com.github.beenotung.javalib.Utils.ThreadLocalStorage;
-import org.bitbucket.ucf_crypto.ga_experiment.crypto.Affine;
-import org.bitbucket.ucf_crypto.ga_experiment.crypto.Crypto;
-import org.bitbucket.ucf_crypto.ga_experiment.crypto.Shift;
-import org.bitbucket.ucf_crypto.ga_experiment.crypto.Substition;
-import sun.nio.cs.ThreadLocalCoders;
+import com.github.beenotung.ga_experiment.crypto.Crypto;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static com.github.beenotung.javalib.Utils.concat;
-import static com.github.beenotung.javalib.Utils.not;
 import static com.github.beenotung.javalib.Utils.uint;
 
 /**

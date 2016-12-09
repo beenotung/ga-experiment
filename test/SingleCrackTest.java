@@ -1,9 +1,8 @@
-import com.github.beenotung.javalib.Utils;
-import org.bitbucket.ucf_crypto.ga_experiment.crack.BruteForceCrack;
-import org.bitbucket.ucf_crypto.ga_experiment.crack.Crack;
-import org.bitbucket.ucf_crypto.ga_experiment.crack.GACrack;
-import org.bitbucket.ucf_crypto.ga_experiment.crypto.Crypto;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
+import com.github.beenotung.ga_experiment.crypto.Package;
+import com.github.beenotung.ga_experiment.crack.BruteForceCrack;
+import com.github.beenotung.ga_experiment.crack.Crack;
+import com.github.beenotung.ga_experiment.crack.GACrack;
+import com.github.beenotung.ga_experiment.crypto.Crypto;
 
 import java.util.ArrayList;
 
@@ -18,7 +17,7 @@ public class SingleCrackTest {
   public static void main(String[] args) throws ClassNotFoundException {
     println("begin", $MODULE.getClass().getName());
 
-    org.bitbucket.ucf_crypto.ga_experiment.crypto.Package.loadAll();
+    Package.loadAll();
 
     $MODULE.crack(BruteForceCrack.$MODULE, TestConfig.messages, TestConfig.N_Pair);
     $MODULE.crack(GACrack.$MODULE, TestConfig.messages, TestConfig.N_Pair);

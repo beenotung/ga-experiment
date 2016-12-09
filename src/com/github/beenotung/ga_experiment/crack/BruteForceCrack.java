@@ -1,8 +1,8 @@
-package org.bitbucket.ucf_crypto.ga_experiment.crack;
+package com.github.beenotung.ga_experiment.crack;
 
+import com.github.beenotung.ga_experiment.crypto.*;
 import com.github.beenotung.javalib.Utils;
 import com.github.beenotung.javalib.Utils.ByteArray;
-import org.bitbucket.ucf_crypto.ga_experiment.crypto.*;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.math.BigInteger;
