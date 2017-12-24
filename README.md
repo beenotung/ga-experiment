@@ -33,3 +33,20 @@ Find the turning point when GA is better traditional cryptanalysis.
     1. [ ] Use GA to crack the key, measure time used
     2. [ ] Use traditional cryptanalysis to crack the key, stop when excess 1.5 times time used by GA
  4. [ ] Adjust test size to find the breaking point of GA
+
+## Demo Video
+- ga-image-crypto.mp4
+on
+[ipfs](https://gateway.ipfs.io/ipfs/QmWZBSrYkn9B2npAacRpJssdW6pkDbd5Mazpr4nuvtUL2s),
+[zeronet-1](https://zero.acelewis.com/#1uPLoaDwKzP6MCGoVzw48r4pxawRBdmQc/data/users/1DLBhCccN3MbM5YmzNS2UfBzDkEZkGZtVg/1514136304-ga-image-crypto.mp4),
+[zeronet-2](https://zero.acelewis.com/#149EPBN4hQRpwj5TcoPETepnoXHCUXzaCN/data/users/1DLBhCccN3MbM5YmzNS2UfBzDkEZkGZtVg/1514137192-ga-image-crypto.mp4),
+[onedrive](https://1drv.ms/v/s!Aiv60SsDASnNg6xNmdQcMDkDbp8cIg)
+- ga-text.mp4
+on
+[ipfs](https://gateway.ipfs.io/ipfs/QmdQwzfPBiB25eoaUxjmxo7ANbsAiKkJkmVdabBnaguxXw),
+[zeronet](https://zero.acelewis.com/#149EPBN4hQRpwj5TcoPETepnoXHCUXzaCN/data/users/1DLBhCccN3MbM5YmzNS2UfBzDkEZkGZtVg/1514137525-ga-text.mp4),
+[onedrive](https://1drv.ms/v/s!Aiv60SsDASnNg6xMnyRox47ZT-Mspg)
+- ga-text.mkv
+on
+[ipfs](https://gateway.ipfs.io/ipfs/QmeVhWx8U81XgnXkVktfSuByefpov6fYFGvUwW7L1nsLbA),
+[onedrive](https://1drv.ms/u/s!Aiv60SsDASnNg6xLnHVSd5AnRsGQsw)
